@@ -23,14 +23,14 @@ public class SemanticKernelService : ISemanticKernelService
 {
     private readonly Kernel _kernel;
     private readonly IChatCompletionService _chatService;
-    private readonly DoubaoSettings _settings;
+    private readonly OllamaSettings _settings;
     private readonly ILogger<SemanticKernelService> _logger;
     private readonly ConcurrentDictionary<string, ConversationHistory> _conversations;
 
     public SemanticKernelService(
         Kernel kernel,
         IChatCompletionService chatService,
-        DoubaoSettings settings,
+        OllamaSettings settings,
         ILogger<SemanticKernelService> logger)
     {
         _kernel = kernel;

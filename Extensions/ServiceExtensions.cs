@@ -1,11 +1,10 @@
-using Azure.AI.OpenAI;
 using ExamRecognitionSystem.Models;
 using ExamRecognitionSystem.Plugins;
 using ExamRecognitionSystem.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Connectors.Ollama;
 
 namespace ExamRecognitionSystem.Extensions;
 
@@ -16,24 +15,21 @@ public static class SemanticKernelExtensions
 {
     public static IServiceCollection ConfigureSemanticKernel(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure Doubao settings
-        var doubaoSettings = configuration.GetSection("DoubaoSettings").Get<DoubaoSettings>()
-            ?? throw new InvalidOperationException("DoubaoSettings configuration is missing");
+        // Configure Ollama settings
+        var ollamaSettings = configuration.GetSection("OllamaSettings").Get<OllamaSettings>()
+            ?? throw new InvalidOperationException("OllamaSettings configuration is missing");
 
-        services.AddSingleton(doubaoSettings);
+        services.AddSingleton(ollamaSettings);
 
         // Configure Semantic Kernel
         services.AddSingleton<Kernel>(serviceProvider =>
         {
             var builder = Kernel.CreateBuilder();
 
-            OpenAIClientOptions clientOptions = new OpenAIClientOptions
-            {
-            };
-            // Add Doubao chat completion service (using OpenAI-compatible API)
-            OpenAIClient openAIClient = new OpenAIClient(doubaoSettings.ApiKey, clientOptions);
-
-            builder.AddOpenAIChatCompletion(doubaoSettings.ModelId, openAIClient);
+            // Add Ollama chat completion service
+            builder.AddOllamaChatCompletion(
+                modelId: ollamaSettings.ModelId,
+                endpoint: new Uri(ollamaSettings.BaseUrl));
 
             // Add plugins
             builder.Plugins.AddFromType<QuestionParsingPlugin>();
@@ -79,14 +75,14 @@ public static class ApplicationServiceExtensions
         services.AddSingleton<IPerformanceMonitoringService, PerformanceMonitoringService>();
 
         // Configure HTTP client for external services
-        services.AddHttpClient("DoubaoClient", client =>
+        services.AddHttpClient("OllamaClient", client =>
         {
-            var doubaoSettings = configuration.GetSection("DoubaoSettings").Get<DoubaoSettings>();
-            if (doubaoSettings != null)
+            var ollamaSettings = configuration.GetSection("OllamaSettings").Get<OllamaSettings>();
+            if (ollamaSettings != null)
             {
-                client.BaseAddress = new Uri(doubaoSettings.BaseUrl);
-                client.Timeout = doubaoSettings.RequestTimeout;
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {doubaoSettings.ApiKey}");
+                client.BaseAddress = new Uri(ollamaSettings.BaseUrl);
+                client.Timeout = ollamaSettings.RequestTimeout;
+                // Ollama doesn't require authorization headers
             }
         });
 
