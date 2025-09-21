@@ -23,19 +23,19 @@ public class SemanticKernelService : ISemanticKernelService
 {
     private readonly Kernel _kernel;
     private readonly IChatCompletionService _chatService;
-    private readonly OllamaSettings _settings;
+    private readonly AIProviderSettings _aiProviderSettings;
     private readonly ILogger<SemanticKernelService> _logger;
     private readonly ConcurrentDictionary<string, ConversationHistory> _conversations;
 
     public SemanticKernelService(
         Kernel kernel,
         IChatCompletionService chatService,
-        OllamaSettings settings,
+        AIProviderSettings aiProviderSettings,
         ILogger<SemanticKernelService> logger)
     {
         _kernel = kernel;
         _chatService = chatService;
-        _settings = settings;
+        _aiProviderSettings = aiProviderSettings;
         _logger = logger;
         _conversations = new ConcurrentDictionary<string, ConversationHistory>();
     }
@@ -199,7 +199,7 @@ public class SemanticKernelService : ISemanticKernelService
 
             var response = await _chatService.GetChatMessageContentAsync(chatHistory, new OpenAIPromptExecutionSettings
             {
-                MaxTokens = _settings.MaxTokens,
+                MaxTokens = GetCurrentProviderMaxTokens(),
                 Temperature = 0.3 // Lower temperature for more consistent extraction
             }, _kernel, cancellationToken);
 
@@ -346,5 +346,25 @@ public class SemanticKernelService : ISemanticKernelService
         }
         
         return questions;
+    }
+
+    /// <summary>
+    /// Gets the maximum tokens setting for the current AI provider
+    /// </summary>
+    private int GetCurrentProviderMaxTokens()
+    {
+        return _aiProviderSettings.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase)
+            ? _aiProviderSettings.OpenAI.MaxTokens
+            : _aiProviderSettings.Ollama.MaxTokens;
+    }
+
+    /// <summary>
+    /// Gets the temperature setting for the current AI provider
+    /// </summary>
+    private double GetCurrentProviderTemperature()
+    {
+        return _aiProviderSettings.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase)
+            ? _aiProviderSettings.OpenAI.Temperature
+            : _aiProviderSettings.Ollama.Temperature;
     }
 }

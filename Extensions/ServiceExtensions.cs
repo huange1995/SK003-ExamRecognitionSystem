@@ -13,22 +13,39 @@ public static class SemanticKernelExtensions
 {
     public static IServiceCollection ConfigureSemanticKernel(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure Ollama settings
-        var ollamaSettings = configuration.GetSection("OllamaSettings").Get<OllamaSettings>()
-            ?? throw new InvalidOperationException("OllamaSettings configuration is missing");
+        // Configure AI Provider settings
+        var aiProviderSettings = configuration.GetSection("AIProvider").Get<AIProviderSettings>()
+            ?? throw new InvalidOperationException("AIProvider configuration is missing");
 
-        services.AddSingleton(ollamaSettings);
+        services.AddSingleton(aiProviderSettings);
 
         // Configure Semantic Kernel
         services.AddSingleton<Kernel>(serviceProvider =>
         {
             var builder = Kernel.CreateBuilder();
 
-            var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>()
-                .CreateClient("OllamaClient");
+            // Configure based on selected provider
+            if (aiProviderSettings.Provider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+            {
+                // Configure OpenAI
+                if (string.IsNullOrEmpty(aiProviderSettings.OpenAI.ApiKey))
+                {
+                    throw new InvalidOperationException("OpenAI API Key is required when using OpenAI provider");
+                }
 
-            // Add Ollama chat completion service
-            builder.AddOllamaChatCompletion(ollamaSettings.ModelId, httpClient);
+                builder.AddOpenAIChatCompletion(
+                    modelId: aiProviderSettings.OpenAI.ModelId,
+                    apiKey: aiProviderSettings.OpenAI.ApiKey,
+                    orgId: aiProviderSettings.OpenAI.Organization);
+            }
+            else
+            {
+                // Configure Ollama (default)
+                var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>()
+                    .CreateClient("OllamaClient");
+
+                builder.AddOllamaChatCompletion(aiProviderSettings.Ollama.ModelId, httpClient);
+            }
 
             // Add plugins
             builder.Plugins.AddFromType<QuestionParsingPlugin>();
@@ -76,11 +93,11 @@ public static class ApplicationServiceExtensions
         // Configure HTTP client for external services
         services.AddHttpClient("OllamaClient", client =>
         {
-            var ollamaSettings = configuration.GetSection("OllamaSettings").Get<OllamaSettings>();
-            if (ollamaSettings != null)
+            var aiProviderSettings = configuration.GetSection("AIProvider").Get<AIProviderSettings>();
+            if (aiProviderSettings?.Ollama != null)
             {
-                client.BaseAddress = new Uri(ollamaSettings.BaseUrl);
-                client.Timeout = TimeSpan.FromMinutes(ollamaSettings.RequestTimeout);
+                client.BaseAddress = new Uri(aiProviderSettings.Ollama.BaseUrl);
+                client.Timeout = TimeSpan.FromMinutes(aiProviderSettings.Ollama.RequestTimeout);
                 // Ollama doesn't require authorization headers
             }
         });

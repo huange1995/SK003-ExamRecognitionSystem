@@ -14,6 +14,31 @@ public class OllamaSettings
 }
 
 /// <summary>
+/// Configuration settings for OpenAI API
+/// </summary>
+public class OpenAISettings
+{
+    public string ApiKey { get; set; } = string.Empty;
+    public string ModelId { get; set; } = "gpt-4o";
+    public string BaseUrl { get; set; } = "https://api.openai.com/v1";
+    public int MaxTokens { get; set; } = 4000;
+    public double Temperature { get; set; } = 0.7;
+    public int MaxRetries { get; set; } = 3;
+    public int RequestTimeout { get; set; } = 60;
+    public string? Organization { get; set; }
+}
+
+/// <summary>
+/// AI provider configuration
+/// </summary>
+public class AIProviderSettings
+{
+    public string Provider { get; set; } = "Ollama"; // "Ollama" or "OpenAI"
+    public OllamaSettings Ollama { get; set; } = new();
+    public OpenAISettings OpenAI { get; set; } = new();
+}
+
+/// <summary>
 /// Represents conversation history for multi-turn dialogues
 /// </summary>
 public class ConversationHistory
