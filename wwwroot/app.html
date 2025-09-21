@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>试卷识别系统 - 应用程序</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-file-alt"></i> 试卷识别系统</h1>
+                <p>基于AI的多线程试卷分析系统</p>
+            </div>
+            <div class="system-status" id="systemStatus">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">正在检查系统状态...</span>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav style="text-align: center; margin-bottom: 20px;">
+            <a href="index.html" class="btn btn-secondary btn-sm">
+                <i class="fas fa-home"></i> 首页
+            </a>
+            <a href="demo.html" class="btn btn-secondary btn-sm">
+                <i class="fas fa-eye"></i> 演示
+            </a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-upload"></i> 上传试卷</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p>拖放您的试卷到这里，或点击浏览</p>
+                            <p class="file-info">支持格式：PDF、DOCX、JPEG、PNG（最大10MB）</p>
+                            <input type="file" id="fileInput" accept=".pdf,.docx,.jpeg,.jpg,.png" hidden>
+                            <button class="btn btn-primary" id="browseBtn">
+                                <i class="fas fa-folder-open"></i> 浏览文件
+                            </button>
+                        </div>
+                        
+                        <div class="file-preview" id="filePreview" style="display: none;">
+                            <div class="file-item">
+                                <div class="file-icon">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div class="file-details">
+                                    <div class="file-name" id="fileName"></div>
+                                    <div class="file-size" id="fileSize"></div>
+                                </div>
+                                <button class="btn btn-danger btn-sm" id="removeFile">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="processing-config" id="processingConfig" style="display: none;">
+                            <h3>处理配置</h3>
+                            <div class="config-row">
+                                <label>每线程题目数：</label>
+                                <input type="number" id="questionsPerThread" value="5" min="1" max="20">
+                            </div>
+                            <div class="config-row">
+                                <label>最大并发线程数：</label>
+                                <input type="number" id="maxThreads" value="4" min="1" max="16">
+                            </div>
+                        </div>
+
+                        <div class="upload-actions" id="uploadActions" style="display: none;">
+                            <button class="btn btn-success" id="startProcessing">
+                                <i class="fas fa-play"></i> 开始处理
+                            </button>
+                            <button class="btn btn-secondary" id="cancelUpload">
+                                <i class="fas fa-times"></i> 取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section" id="progressSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-tasks"></i> 处理进度</h2>
+                        <div class="progress-actions">
+                            <button class="btn btn-danger btn-sm" id="cancelProcessing">
+                                <i class="fas fa-stop"></i> 取消处理
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress-overview">
+                            <div class="progress-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="completedQuestions">0</div>
+                                    <div class="stat-label">已完成</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="totalQuestions">0</div>
+                                    <div class="stat-label">总数</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="processingSpeed">0</div>
+                                    <div class="stat-label">题/秒</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="activeThreads">0</div>
+                                    <div class="stat-label">活跃线程</div>
+                                </div>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <div class="progress-text" id="progressText">0%</div>
+                            </div>
+                        </div>
+
+                        <div class="thread-status">
+                            <h3>线程状态</h3>
+                            <div class="thread-list" id="threadList">
+                                <!-- Thread items will be populated here -->
+                            </div>
+                        </div>
+
+                        <div class="performance-metrics">
+                            <h3>系统性能</h3>
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <span class="metric-label">CPU使用率：</span>
+                                    <span class="metric-value" id="cpuUsage">0%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">内存使用率：</span>
+                                    <span class="metric-value" id="memoryUsage">0 MB</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">处理时间：</span>
+                                    <span class="metric-value" id="processingTime">00:00:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-list-alt"></i> 提取的题目</h2>
+                        <div class="results-actions">
+                            <button class="btn btn-primary btn-sm" id="exportResults">
+                                <i class="fas fa-download"></i> 导出JSON
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="newUpload">
+                                <i class="fas fa-plus"></i> 新上传
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="results-summary">
+                            <div class="summary-stats">
+                                <div class="summary-item">
+                                    <span class="summary-label">题目总数：</span>
+                                    <span class="summary-value" id="totalExtracted">0</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">处理时间：</span>
+                                    <span class="summary-value" id="finalProcessingTime">0s</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">平均速度：</span>
+                                    <span class="summary-value" id="averageSpeed">0 Q/s</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="questions-filter">
+                            <div class="filter-controls">
+                                <select id="typeFilter">
+                                    <option value="all">所有类型</option>
+                                    <option value="SingleChoice">单选题</option>
+                                    <option value="MultipleChoice">多选题</option>
+                                    <option value="FillInBlank">填空题</option>
+                                    <option value="ShortAnswer">简答题</option>
+                                    <option value="Essay">论述题</option>
+                                </select>
+                                <input type="text" id="searchInput" placeholder="搜索题目...">
+                            </div>
+                        </div>
+
+                        <div class="questions-list" id="questionsList">
+                            <!-- Questions will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p id="loadingText">正在处理...</p>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer">
+            <!-- Toast messages will be added here -->
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

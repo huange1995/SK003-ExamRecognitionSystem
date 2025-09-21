@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>试卷识别系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content" style="text-align: center; width: 100%;">
+                <h1><i class="fas fa-file-alt"></i> 试卷识别系统</h1>
+                <p>基于AI的多线程试卷分析系统</p>
+            </div>
+        </header>
+
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-rocket"></i> 欢迎使用试卷识别系统</h2>
+                </div>
+                <div class="card-body" style="text-align: center; padding: 50px 30px;">
+                    <p style="font-size: 1.2rem; color: #4a5568; margin-bottom: 40px; line-height: 1.6;">
+                        本系统采用先进的AI技术自动从试卷中提取题目。
+                        支持多种文件格式，采用智能多线程技术实现快速处理。
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px;">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-upload" style="font-size: 3rem; color: #4facfe;"></i>
+                            </div>
+                            <h3>简单上传</h3>
+                            <p>支持PDF、DOCX、JPEG和PNG文件，最大10MB</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-bolt" style="font-size: 3rem; color: #48bb78;"></i>
+                            </div>
+                            <h3>快速处理</h3>
+                            <p>多线程处理，智能任务分配</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain" style="font-size: 3rem; color: #9f7aea;"></i>
+                            </div>
+                            <h3>AI驱动</h3>
+                            <p>先进视觉模型，精确题目提取</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                        <a href="app.html" class="btn btn-primary" style="text-decoration: none; font-size: 1.1rem; padding: 15px 30px;">
+                            <i class="fas fa-play"></i> 启动应用
+                        </a>
+                        <a href="demo.html" class="btn btn-secondary" style="text-decoration: none; font-size: 1.1rem; padding: 15px 30px;">
+                            <i class="fas fa-eye"></i> 查看演示
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-star"></i> 主要功能</h2>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div class="feature-item">
+                            <h4><i class="fas fa-cogs"></i> 多线程处理</h4>
+                            <p>可配置线程池的并行处理，实现最佳性能</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4><i class="fas fa-chart-line"></i> 实时监控</h4>
+                            <p>实时进度跟踪，详细性能指标</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4><i class="fas fa-shield-alt"></i> 安全处理</h4>
+                            <p>文件验证、请求限制和安全临时存储</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4><i class="fas fa-download"></i> 导出结果</h4>
+                            <p>以结构化JSON格式导出提取的题目</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4><i class="fas fa-search"></i> 智能检测</h4>
+                            <p>自动题型检测和答案提取</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4><i class="fas fa-mobile-alt"></i> 响应式设计</h4>
+                            <p>在桌面、平板和移动设备上完美运行</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Documentation -->
+        <section class="api-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-code"></i> API文档</h2>
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 20px;">本系统提供完整的REST API供程序化访问：</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div class="api-endpoint">
+                            <div class="api-method post">POST</div>
+                            <div class="api-path">/api/fileupload/upload</div>
+                            <div class="api-description">上传试卷文件</div>
+                        </div>
+                        
+                        <div class="api-endpoint">
+                            <div class="api-method get">GET</div>
+                            <div class="api-path">/api/monitoring/status/{id}</div>
+                            <div class="api-description">获取处理状态</div>
+                        </div>
+                        
+                        <div class="api-endpoint">
+                            <div class="api-method get">GET</div>
+                            <div class="api-path">/api/monitoring/questions/{id}</div>
+                            <div class="api-description">检索提取的题目</div>
+                        </div>
+                        
+                        <div class="api-endpoint">
+                            <div class="api-method get">GET</div>
+                            <div class="api-path">/api/monitoring/health</div>
+                            <div class="api-description">系统健康检查</div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="/swagger" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-book"></i> 查看完整API文档
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <style>
+        .welcome-section {
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: #f7fafc;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h3 {
+            color: #2d3748;
+            margin: 15px 0 10px 0;
+            font-size: 1.3rem;
+        }
+        
+        .feature-card p {
+            color: #718096;
+            line-height: 1.5;
+        }
+        
+        .features-section {
+            margin-bottom: 30px;
+        }
+        
+        .feature-item {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .feature-item h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-item p {
+            color: #718096;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .api-section {
+            margin-bottom: 30px;
+        }
+        
+        .api-endpoint {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .api-method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .api-method.post {
+            background-color: #48bb78;
+        }
+        
+        .api-method.get {
+            background-color: #4facfe;
+        }
+        
+        .api-path {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .api-description {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</body>
+</html>
