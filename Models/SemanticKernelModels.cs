@@ -10,7 +10,7 @@ public class OllamaSettings
     public int MaxTokens { get; set; } = 4000;
     public double Temperature { get; set; } = 0.7;
     public int MaxRetries { get; set; } = 3;
-    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromMinutes(2);
+    public int RequestTimeout { get; set; } = 20;
 }
 
 /// <summary>

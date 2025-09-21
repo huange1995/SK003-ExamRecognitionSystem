@@ -19,8 +19,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure custom services
-builder.Services.ConfigureSemanticKernel(builder.Configuration);
 builder.Services.ConfigureApplicationServices(builder.Configuration);
+builder.Services.ConfigureSemanticKernel(builder.Configuration);
 
 var app = builder.Build();
 

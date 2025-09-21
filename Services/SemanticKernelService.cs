@@ -47,14 +47,6 @@ public class SemanticKernelService : ISemanticKernelService
         {
             _logger.LogInformation("Starting vision analysis for image with {QuestionCount} questions", request.QuestionNumbers.Count);
 
-           var c= new ChatHistory();
-            c.AddUserMessage("Hello");
-            var aa = _chatService.GetChatMessageContentAsync(c, new OpenAIPromptExecutionSettings
-            {
-                MaxTokens = request.MaxTokens,
-                Temperature = request.Temperature
-            }, _kernel, cancellationToken);
-            var ccc=  aa.Result?.Content?.ToString();
             // Get or create conversation history
             var conversation = request.History ?? await CreateConversationAsync("Exam paper question extraction");
             
@@ -86,6 +78,7 @@ public class SemanticKernelService : ISemanticKernelService
             if (!string.IsNullOrEmpty(request.ImageBase64))
             {
                 userMessage += "\n[Image data provided for analysis]";
+                //userMessage += $"\n (data:image/png;base64,{request.ImageBase64})";
             }
             chatHistory.AddUserMessage(userMessage);
 
@@ -98,7 +91,7 @@ public class SemanticKernelService : ISemanticKernelService
                 FrequencyPenalty = 0.1,
                 PresencePenalty = 0.1
             };
-
+            
             // Get response from the model
             var response = await _chatService.GetChatMessageContentAsync(chatHistory, executionSettings, _kernel, cancellationToken);
             

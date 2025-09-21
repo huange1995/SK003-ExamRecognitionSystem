@@ -1,10 +1,8 @@
 using ExamRecognitionSystem.Models;
 using ExamRecognitionSystem.Plugins;
 using ExamRecognitionSystem.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Ollama;
 
 namespace ExamRecognitionSystem.Extensions;
 
@@ -26,10 +24,11 @@ public static class SemanticKernelExtensions
         {
             var builder = Kernel.CreateBuilder();
 
+            var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>()
+                .CreateClient("OllamaClient");
+
             // Add Ollama chat completion service
-            builder.AddOllamaChatCompletion(
-                modelId: ollamaSettings.ModelId,
-                endpoint: new Uri(ollamaSettings.BaseUrl));
+            builder.AddOllamaChatCompletion(ollamaSettings.ModelId, httpClient);
 
             // Add plugins
             builder.Plugins.AddFromType<QuestionParsingPlugin>();
@@ -81,7 +80,7 @@ public static class ApplicationServiceExtensions
             if (ollamaSettings != null)
             {
                 client.BaseAddress = new Uri(ollamaSettings.BaseUrl);
-                client.Timeout = ollamaSettings.RequestTimeout;
+                client.Timeout = TimeSpan.FromMinutes(ollamaSettings.RequestTimeout);
                 // Ollama doesn't require authorization headers
             }
         });
