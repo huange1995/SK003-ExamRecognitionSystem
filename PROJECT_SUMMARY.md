@@ -2,12 +2,13 @@
 
 ## 项目概述
 
-成功基于 .NET 8.0 框架，结合 Semantic Kernel 和 Doubao-Seed-1.6-thinking 视觉模型，开发了一个高性能多线程图片试卷识别系统。
+成功基于 .NET 8.0 框架，结合 Semantic Kernel 和多AI提供商（Ollama/OpenAI），开发了一个高性能多线程图片试卷识别系统。
 
 ## 核心功能实现 ✅
 
 ### 1. 架构设计
-- ✅ **Semantic Kernel 集成**: 完整实现与视觉模型的多轮对话机制
+- ✅ **Semantic Kernel 集成**: 完整实现与AI模型的多轮对话机制
+- ✅ **多AI提供商支持**: 支持 Ollama 本地模型和 OpenAI 云端模型
 - ✅ **历史上下文缓存**: 支持多线程环境下的对话历史管理
 - ✅ **线程分配策略**: 每个线程处理5道题目的智能分配
 - ✅ **语义函数插件**: 通过标准 Semantic Kernel 插件实现大模型交互
@@ -29,7 +30,7 @@
 - ✅ **题型识别**: 单选/多选/填空/简答/论述题自动分类
 - ✅ **分值解析**: 支持整数和小数分值提取
 - ✅ **答案提取**: 自动识别标准答案
-- ✅ **大模型驱动**: 直接利用视觉模型能力
+- ✅ **AI模型驱动**: 支持多种AI模型（Ollama本地/OpenAI云端）
 
 ### 5. 数据管理
 - ✅ **并发集合**: 线程安全的数据存储和处理
@@ -62,7 +63,7 @@
                               │
 ┌─────────────────────────────────────────────────────────────┐
 │                   AI Model Layer                           │
-│           Doubao-Seed-1.6-thinking Vision Model            │
+│        Multi-Provider AI Models (Ollama/OpenAI)            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -89,10 +90,35 @@ SK003/
 │   └── ServiceExtensions.cs
 ├── Middleware/               # 自定义中间件
 │   └── CustomMiddleware.cs
+├── wwwroot/                  # 前端静态文件
+│   ├── index.html            # 系统首页 (255行)
+│   ├── app.html              # 主应用页面 (232行)
+│   ├── demo.html             # 演示页面 (191行)
+│   ├── app.js                # 主应用逻辑 (636行)
+│   ├── demo.js               # 演示功能 (440行)
+│   └── styles.css            # 全局样式 (730行)
 ├── appsettings.json         # 生产配置
 ├── appsettings.Development.json # 开发配置
 └── Program.cs               # 应用程序入口
 ```
+
+### 前端架构详解
+
+#### 🌐 用户界面层 (wwwroot)
+- **多页面架构**: 首页、主应用、演示三个独立页面
+- **现代化UI**: 响应式设计，渐变主题，Font Awesome图标
+- **交互体验**: 拖拽上传、实时状态、进度监控
+- **功能完整**: 文件处理、结果展示、数据导出
+
+#### 📱 页面功能分工
+- **index.html**: 系统介绍和导航入口
+- **app.html**: 完整的业务流程界面
+- **demo.html**: 功能演示和测试环境
+
+#### ⚡ JavaScript 模块化
+- **app.js**: 核心业务逻辑，API集成，状态管理
+- **demo.js**: 演示功能，模拟数据，交互控制
+- **styles.css**: 统一样式系统，组件库
 
 ## 核心特性
 
@@ -133,15 +159,26 @@ SK003/
 
 ## 配置参数
 
-### Doubao 模型配置
+### AI 提供商配置
 ```json
 {
-  "DoubaoSettings": {
-    "ApiKey": "your-doubao-api-key",
-    "BaseUrl": "https://ark.cn-beijing.volces.com/api/v3",
-    "ModelId": "ep-20241203135326-gd8tx",
-    "MaxTokens": 4000,
-    "Temperature": 0.7
+  "AIProvider": {
+    "Provider": "Ollama",
+    "Ollama": {
+      "BaseUrl": "http://localhost:11434",
+      "ModelId": "llava:13b",
+      "MaxTokens": 4000,
+      "Temperature": 0.7,
+      "RequestTimeout": 100
+    },
+    "OpenAI": {
+      "ApiKey": "",
+      "ModelId": "gpt-4o",
+      "BaseUrl": "https://api.openai.com/v1",
+      "MaxTokens": 4000,
+      "Temperature": 0.7,
+      "RequestTimeout": 60
+    }
   }
 }
 ```
@@ -178,7 +215,9 @@ SK003/
 - **多核 CPU（推荐4核以上）**
 
 ### 依赖服务
-- **Doubao API 服务**
+- **AI 模型服务**
+  - **Ollama**: 本地部署，支持开源模型（llava、llama等）
+  - **OpenAI**: 云端服务，需要 API 密钥
 - **文件存储空间**
 - **日志存储空间**
 
@@ -214,6 +253,7 @@ SK003/
 - [ ] 容器化部署（Docker）
 - [ ] 微服务架构拆分
 - [ ] 监控告警集成
+- [ ] 更多AI提供商支持（Azure OpenAI、Claude等）
 
 ## 质量保证
 
@@ -241,9 +281,10 @@ SK003/
 5. **易维护**: 结构化日志，完整文档
 
 ### 技术创新
-1. **Semantic Kernel 深度集成**: 充分利用语义函数和插件机制
-2. **智能线程管理**: 基于系统资源的自适应调优
-3. **多轮对话支持**: 上下文感知的视觉模型交互
-4. **实时监控**: 精细化的处理进度和性能监控
+1. **多AI提供商架构**: 统一接口支持本地和云端AI模型
+2. **Semantic Kernel 深度集成**: 充分利用语义函数和插件机制
+3. **智能线程管理**: 基于系统资源的自适应调优
+4. **多轮对话支持**: 上下文感知的AI模型交互
+5. **实时监控**: 精细化的处理进度和性能监控
 
 项目已达到生产就绪状态，可以直接部署使用。
