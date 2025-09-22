@@ -10,6 +10,7 @@
 - **智能多线程处理**: 每个线程处理5道题目，支持动态线程池管理
 - **文件格式支持**: PDF、DOCX、JPEG、PNG 格式文件上传和处理
 - **智能题目解析**: 自动识别题目类型、分值、选项和答案
+- **自定义AI服务**: 完整实现豆包AI的文本生成和聊天完成服务
 
 ### 🔧 技术特性
 - **高性能架构**: 基于 .NET 8.0 和异步编程模式
@@ -35,6 +36,12 @@
                                               │(Ollama/OpenAI/豆包)│
                                               └─────────────────┘
 ```
+
+### 🔧 AI服务架构
+- **统一接口**: 通过 Semantic Kernel 统一管理多种AI提供商
+- **自定义服务**: DoubaoTextGenerationService 实现完整的豆包AI集成
+- **智能路由**: 根据配置自动选择最适合的AI模型
+- **插件系统**: 支持题目解析、图像分析、文件处理等专用插件
 
 ## 快速开始
 
@@ -402,9 +409,26 @@ wwwroot/
 
 ### 添加新的AI模型支持
 1. 在 `AIProviderSettings` 中添加新的提供商配置
-2. 在 `SemanticKernelExtensions.ConfigureSemanticKernel` 中添加配置逻辑
-3. 更新 `appsettings.json` 配置结构
-4. 支持的提供商类型：Ollama（本地）、OpenAI（云端）、豆包（云端）
+2. 创建自定义的文本生成服务（参考 `DoubaoTextGenerationService`）
+3. 在 `SemanticKernelExtensions.ConfigureSemanticKernel` 中添加配置逻辑
+4. 更新 `appsettings.json` 配置结构
+5. 支持的提供商类型：Ollama（本地）、OpenAI（云端）、豆包（云端）
+
+### 豆包AI集成示例
+```csharp
+// DoubaoTextGenerationService 实现了完整的AI服务接口
+public class DoubaoTextGenerationService : ITextGenerationService, IChatCompletionService
+{
+    // 支持文本生成
+    public async Task<IReadOnlyList<TextContent>> GetTextContentsAsync(...)
+    
+    // 支持聊天完成
+    public async Task<IReadOnlyList<ChatMessageContent>> GetChatMessageContentsAsync(...)
+    
+    // 支持流式响应
+    public async IAsyncEnumerable<StreamingTextContent> GetStreamingTextContentsAsync(...)
+}
+```
 
 ## 许可证
 
@@ -429,6 +453,7 @@ wwwroot/
 
 ---
 
-**版本**: 1.0.0  
-**最后更新**: 2025-09-20  
-**开发状态**: 生产就绪
+**版本**: 1.0.1  
+**最后更新**: 2025-01-23  
+**开发状态**: 生产就绪  
+**新增特性**: 豆包AI完整集成、自定义AI服务架构

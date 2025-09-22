@@ -2,13 +2,14 @@
 
 ## 项目概述
 
-成功基于 .NET 8.0 框架，结合 Semantic Kernel 和多AI提供商（Ollama/OpenAI），开发了一个高性能多线程图片试卷识别系统。
+成功基于 .NET 8.0 框架，结合 Semantic Kernel 和多AI提供商（Ollama/OpenAI/豆包），开发了一个高性能多线程图片试卷识别系统。系统完整实现了豆包AI的自定义服务集成，提供了统一的AI服务接口。
 
 ## 核心功能实现 ✅
 
 ### 1. 架构设计
 - ✅ **Semantic Kernel 集成**: 完整实现与AI模型的多轮对话机制
-- ✅ **多AI提供商支持**: 支持 Ollama 本地模型和 OpenAI 云端模型
+- ✅ **多AI提供商支持**: 支持 Ollama 本地模型、OpenAI 云端模型和豆包云端模型
+- ✅ **自定义AI服务**: 完整实现 DoubaoTextGenerationService，支持文本生成和聊天完成
 - ✅ **历史上下文缓存**: 支持多线程环境下的对话历史管理
 - ✅ **线程分配策略**: 每个线程处理5道题目的智能分配
 - ✅ **语义函数插件**: 通过标准 Semantic Kernel 插件实现大模型交互
@@ -87,7 +88,8 @@ SK003/
 ├── Plugins/                  # Semantic Kernel 插件
 │   └── SemanticKernelPlugins.cs
 ├── Extensions/               # 扩展方法和配置
-│   └── ServiceExtensions.cs
+│   ├── DoubaoTextGenerationService.cs  # 豆包AI自定义服务实现 (157行)
+│   └── ServiceExtensions.cs            # 服务配置扩展 (273行)
 ├── Middleware/               # 自定义中间件
 │   └── CustomMiddleware.cs
 ├── wwwroot/                  # 前端静态文件
@@ -290,10 +292,12 @@ SK003/
 5. **易维护**: 结构化日志，完整文档
 
 ### 技术创新
-1. **多AI提供商架构**: 统一接口支持本地(Ollama)和云端(OpenAI/GLM)AI模型
-2. **Semantic Kernel 深度集成**: 充分利用语义函数和插件机制
-3. **智能线程管理**: 基于系统资源的自适应调优
-4. **多轮对话支持**: 上下文感知的AI模型交互
-5. **实时监控**: 精细化的处理进度和性能监控
+1. **多AI提供商架构**: 统一接口支持本地(Ollama)和云端(OpenAI/豆包)AI模型
+2. **自定义AI服务实现**: 完整实现豆包AI的ITextGenerationService和IChatCompletionService接口
+3. **Semantic Kernel 深度集成**: 充分利用语义函数和插件机制
+4. **智能线程管理**: 基于系统资源的自适应调优
+5. **多轮对话支持**: 上下文感知的AI模型交互
+6. **实时监控**: 精细化的处理进度和性能监控
+7. **流式响应支持**: 支持异步流式文本生成和聊天完成
 
 项目已达到生产就绪状态，可以直接部署使用。

@@ -43,10 +43,9 @@ public static class SemanticKernelExtensions
             }
             else if (aiProviderSettings.Provider.Equals("Doubao", StringComparison.OrdinalIgnoreCase))
             {
-                // Configure GLM (using OpenAI-compatible API)
                 if (string.IsNullOrEmpty(aiProviderSettings.Doubao.ApiKey))
                 {
-                    throw new InvalidOperationException("GLM API Key is required when using GLM provider");
+                    throw new InvalidOperationException("Doubao API Key is required when using Doubao provider");
                 }
 
                 var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>()
