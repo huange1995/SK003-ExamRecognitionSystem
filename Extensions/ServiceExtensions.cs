@@ -1,8 +1,11 @@
+using DocumentFormat.OpenXml.Wordprocessing;
 using ExamRecognitionSystem.Models;
 using ExamRecognitionSystem.Plugins;
 using ExamRecognitionSystem.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.TextGeneration;
 
 namespace ExamRecognitionSystem.Extensions;
 
@@ -37,6 +40,24 @@ public static class SemanticKernelExtensions
                     modelId: aiProviderSettings.OpenAI.ModelId,
                     apiKey: aiProviderSettings.OpenAI.ApiKey,
                     orgId: aiProviderSettings.OpenAI.Organization);
+            }
+            else if (aiProviderSettings.Provider.Equals("Doubao", StringComparison.OrdinalIgnoreCase))
+            {
+                // Configure GLM (using OpenAI-compatible API)
+                if (string.IsNullOrEmpty(aiProviderSettings.Doubao.ApiKey))
+                {
+                    throw new InvalidOperationException("GLM API Key is required when using GLM provider");
+                }
+
+                var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>()
+                    .CreateClient("DoubaoClient");
+
+
+                var doubaoService = new DoubaoTextGenerationService(httpClient, aiProviderSettings.Doubao);
+
+
+                builder.Services.AddSingleton<ITextGenerationService>(doubaoService);
+                builder.Services.AddSingleton<IChatCompletionService>(doubaoService);
             }
             else
             {
@@ -99,6 +120,18 @@ public static class ApplicationServiceExtensions
                 client.BaseAddress = new Uri(aiProviderSettings.Ollama.BaseUrl);
                 client.Timeout = TimeSpan.FromMinutes(aiProviderSettings.Ollama.RequestTimeout);
                 // Ollama doesn't require authorization headers
+            }
+        });
+
+        // Configure HTTP client for Doubao
+        services.AddHttpClient("DoubaoClient", client =>
+        {
+            var aiProviderSettings = configuration.GetSection("AIProvider").Get<AIProviderSettings>();
+            if (aiProviderSettings?.Doubao != null)
+            {
+                client.BaseAddress = new Uri(aiProviderSettings.Doubao.BaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(aiProviderSettings.Doubao.RequestTimeout);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {aiProviderSettings.Doubao.ApiKey}");
             }
         });
 

@@ -1,11 +1,11 @@
 # 高性能多线程图片试卷识别系统
 
-基于 .NET 8.0、Semantic Kernel 和多AI提供商（Ollama/OpenAI）开发的智能试卷识别系统。
+基于 .NET 8.0、Semantic Kernel 和多AI提供商（Ollama/OpenAI/豆包）开发的智能试卷识别系统。
 
 ## 功能特性
 
 ### 🚀 核心功能
-- **多AI提供商支持**: 支持 Ollama 本地模型和 OpenAI 云端模型，可灵活切换
+- **多AI提供商支持**: 支持 Ollama 本地模型、OpenAI 云端模型和豆包(Doubao) AI，可灵活切换
 - **多轮对话机制**: 基于 Semantic Kernel 与AI模型的多轮对话，支持历史上下文缓存
 - **智能多线程处理**: 每个线程处理5道题目，支持动态线程池管理
 - **文件格式支持**: PDF、DOCX、JPEG、PNG 格式文件上传和处理
@@ -32,7 +32,7 @@
                                                         ▼
                                               ┌─────────────────┐
                                               │ AI 模型服务层   │
-                                              │ (Ollama/OpenAI) │
+                                              │(Ollama/OpenAI/豆包)│
                                               └─────────────────┘
 ```
 
@@ -79,6 +79,22 @@ cd SK003
       "ApiKey": "your-openai-api-key",
       "ModelId": "gpt-4o",
       "BaseUrl": "https://api.openai.com/v1",
+      "MaxTokens": 4000,
+      "Temperature": 0.7
+    }
+  }
+}
+```
+
+**使用豆包(Doubao) AI 模型：**
+```json
+{
+  "AIProvider": {
+    "Provider": "Doubao",
+    "Doubao": {
+      "ApiKey": "your-doubao-api-key",
+      "ModelId": "ep-20250921160727-qgzd9",
+      "BaseUrl": "https://ark.cn-beijing.volces.com/api/v3",
       "MaxTokens": 4000,
       "Temperature": 0.7
     }
@@ -152,6 +168,14 @@ GET /api/monitoring/questions/{sessionId}
       "ApiKey": "",
       "ModelId": "gpt-4o",
       "BaseUrl": "https://api.openai.com/v1",
+      "MaxTokens": 4000,
+      "Temperature": 0.7,
+      "RequestTimeout": 60
+    },
+    "Doubao": {
+      "ApiKey": "",
+      "BaseUrl": "https://ark.cn-beijing.volces.com/api/v3",
+      "ModelId": "ep-20250921160727-qgzd9",
       "MaxTokens": 4000,
       "Temperature": 0.7,
       "RequestTimeout": 60
@@ -380,7 +404,7 @@ wwwroot/
 1. 在 `AIProviderSettings` 中添加新的提供商配置
 2. 在 `SemanticKernelExtensions.ConfigureSemanticKernel` 中添加配置逻辑
 3. 更新 `appsettings.json` 配置结构
-4. 支持的提供商类型：Ollama（本地）、OpenAI（云端）
+4. 支持的提供商类型：Ollama（本地）、OpenAI（云端）、豆包（云端）
 
 ## 许可证
 

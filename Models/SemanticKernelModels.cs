@@ -29,13 +29,28 @@ public class OpenAISettings
 }
 
 /// <summary>
+/// Configuration settings for Doubao API
+/// </summary>
+public class DoubaoSettings
+{
+    public string ApiKey { get; set; } = string.Empty;
+    public string ModelId { get; set; } = "ep-20250921160727-qgzd9";
+    public string BaseUrl { get; set; } = "https://ark.cn-beijing.volces.com/api/v3";
+    public int MaxTokens { get; set; } = 4000;
+    public double Temperature { get; set; } = 0.7;
+    public int MaxRetries { get; set; } = 3;
+    public int RequestTimeout { get; set; } = 60;
+}
+
+/// <summary>
 /// AI provider configuration
 /// </summary>
 public class AIProviderSettings
 {
-    public string Provider { get; set; } = "Ollama"; // "Ollama" or "OpenAI"
+    public string Provider { get; set; } = "Ollama"; // "Ollama", "OpenAI", or "Doubao"
     public OllamaSettings Ollama { get; set; } = new();
     public OpenAISettings OpenAI { get; set; } = new();
+    public DoubaoSettings Doubao { get; set; } = new();
 }
 
 /// <summary>
