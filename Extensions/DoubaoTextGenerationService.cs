@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.TextGeneration;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ExamRecognitionSystem.Extensions
 {
@@ -59,29 +60,73 @@ namespace ExamRecognitionSystem.Extensions
 
             if (result?.Choices?.Length > 0)
             {
-                var textContent = new TextContent(result.Choices[0].Message.Content);
+                var textContent = new TextContent(result.Choices[0].Message.Content ?? string.Empty);
                 return new List<TextContent> { textContent };
             }
 
             return new List<TextContent>();
         }
 
+        /// <summary>
+        /// 获取聊天消息内容，支持多模态输入（文本和图片）
+        /// </summary>
         public async Task<IReadOnlyList<ChatMessageContent>> GetChatMessageContentsAsync(
             ChatHistory chatHistory,
             PromptExecutionSettings? executionSettings = null,
             Kernel? kernel = null,
             CancellationToken cancellationToken = default)
         {
-            var messages = chatHistory.Select(msg => new
+            // 检查执行设置中是否包含图片信息
+            var imageUrl = executionSettings?.ExtensionData?.TryGetValue("imageUrl", out var urlValue) == true ? urlValue as string : null;
+            var base64Image = executionSettings?.ExtensionData?.TryGetValue("base64Image", out var base64Value) == true ? base64Value as string : null;
+            var imageFormat = executionSettings?.ExtensionData?.TryGetValue("imageFormat", out var formatValue) == true ? formatValue as string ?? "png" : "png";
+
+            var messages = new List<object>();
+
+            // 处理聊天历史
+            foreach (var msg in chatHistory)
             {
-                role = msg.Role.Label.ToLower(),
-                content = msg.Content
-            }).ToArray();
+                var messageContent = new List<object> { new { type = "text", text = msg.Content } };
+
+                // 如果是最后一条用户消息且包含图片信息，添加图片内容
+                if (msg == chatHistory.LastOrDefault() && msg.Role == AuthorRole.User)
+                {
+                    if (!string.IsNullOrWhiteSpace(imageUrl))
+                    {
+                        if (ImageHelper.IsValidImageUrl(imageUrl))
+                        {
+                            messageContent.Add(new { type = "image_url", image_url = new { url = imageUrl } });
+                        }
+                        else
+                        {
+                            throw new ArgumentException("提供的图片URL格式无效", nameof(imageUrl));
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(base64Image))
+                    {
+                        if (ImageHelper.IsValidBase64(base64Image))
+                        {
+                            var dataUrl = ImageHelper.CreateBase64ImageUrl(base64Image, imageFormat);
+                            messageContent.Add(new { type = "image_url", image_url = new { url = dataUrl } });
+                        }
+                        else
+                        {
+                            throw new ArgumentException("提供的base64字符串格式无效", nameof(base64Image));
+                        }
+                    }
+                }
+
+                messages.Add(new
+                {
+                    role = msg.Role.Label.ToLower(),
+                    content = messageContent.Count > 1 ? messageContent.ToArray() : (object)msg.Content
+                });
+            }
 
             var requestBody = new
             {
                 model = _settings.ModelId,
-                messages = messages,
+                messages = messages.ToArray(),
                 stream = false,
                 temperature = 0.7,
                 max_tokens = 2000
@@ -106,7 +151,7 @@ namespace ExamRecognitionSystem.Extensions
 
             if (result?.Choices?.Length > 0)
             {
-                var chatMessage = new ChatMessageContent(AuthorRole.Assistant, result.Choices[0].Message.Content);
+                var chatMessage = new ChatMessageContent(AuthorRole.Assistant, result.Choices[0].Message.Content ?? string.Empty);
                 return new List<ChatMessageContent> { chatMessage };
             }
 
@@ -139,164 +184,103 @@ namespace ExamRecognitionSystem.Extensions
             }
         }
 
-        /// <summary>
-        /// 发送多模态消息（支持文本和图片）
-        /// </summary>
-        public async Task<IReadOnlyList<ChatMessageContent>> GetMultiModalChatMessageContentsAsync(
-            List<MultiModalMessage> messages,
-            PromptExecutionSettings? executionSettings = null,
-            Kernel? kernel = null,
-            CancellationToken cancellationToken = default)
-        {
-            var requestMessages = messages.Select(msg => new
-            {
-                role = msg.Role.ToLower(),
-                content = msg.Content.Select(content => new
-                {
-                    type = content.Type,
-                    text = content.Text,
-                    image_url = content.ImageUrl != null ? new { url = content.ImageUrl.Url } : null
-                }).Where(c => c.text != null || c.image_url != null).ToArray()
-            }).ToArray();
 
-            var requestBody = new
-            {
-                model = _settings.ModelId,
-                messages = requestMessages,
-                stream = false,
-                temperature = 0.7,
-                max_tokens = 2000
-            };
-
-            var json = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_settings.ApiKey}");
-
-            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/chat/completions", content, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Doubao API request failed: {response.StatusCode}, {errorContent}");
-            }
-
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            var result = JsonSerializer.Deserialize<DoubaoResponse>(responseContent);
-
-            if (result?.Choices?.Length > 0)
-            {
-                var chatMessage = new ChatMessageContent(AuthorRole.Assistant, result.Choices[0].Message.Content);
-                return new List<ChatMessageContent> { chatMessage };
-            }
-
-            return new List<ChatMessageContent>();
-        }
-
-        /// <summary>
-        /// 发送包含图片的文本生成请求
-        /// </summary>
-        public async Task<IReadOnlyList<TextContent>> GetTextContentsWithImageAsync(
-            string prompt,
-            string? imageUrl = null,
-            string? base64Image = null,
-            string imageFormat = "png",
-            PromptExecutionSettings? executionSettings = null,
-            Kernel? kernel = null,
-            CancellationToken cancellationToken = default)
-        {
-            var messages = new List<MultiModalMessage>
-            {
-                new MultiModalMessage
-                {
-                    Role = "user",
-                    Content = new List<MultiModalContent>
-                    {
-                        new MultiModalContent { Type = "text", Text = prompt }
-                    }
-                }
-            };
-
-            // 添加图片内容
-            if (!string.IsNullOrWhiteSpace(imageUrl))
-            {
-                if (ImageHelper.IsValidImageUrl(imageUrl))
-                {
-                    messages[0].Content.Add(new MultiModalContent
-                    {
-                        Type = "image_url",
-                        ImageUrl = new ImageUrl { Url = imageUrl }
-                    });
-                }
-                else
-                {
-                    throw new ArgumentException("提供的图片URL格式无效", nameof(imageUrl));
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(base64Image))
-            {
-                if (ImageHelper.IsValidBase64(base64Image))
-                {
-                    var dataUrl = ImageHelper.CreateBase64ImageUrl(base64Image, imageFormat);
-                    messages[0].Content.Add(new MultiModalContent
-                    {
-                        Type = "image_url",
-                        ImageUrl = new ImageUrl { Url = dataUrl }
-                    });
-                }
-                else
-                {
-                    throw new ArgumentException("提供的base64字符串格式无效", nameof(base64Image));
-                }
-            }
-
-            var chatResults = await GetMultiModalChatMessageContentsAsync(messages, executionSettings, kernel, cancellationToken);
-            return chatResults.Select(chat => new TextContent(chat.Content ?? string.Empty)).ToList();
-        }
     }
 
     public class DoubaoResponse
     {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+        
+        [JsonPropertyName("object")]
+        public string Object { get; set; } = "chat.completion";
+        
+        [JsonPropertyName("created")]
+        public long Created { get; set; }
+        
+        [JsonPropertyName("model")]
+        public string Model { get; set; } = string.Empty;
+        
+        [JsonPropertyName("service_tier")]
+        public string ServiceTier { get; set; } = string.Empty;
+        
+        [JsonPropertyName("choices")]
         public Choice[]? Choices { get; set; }
+        
+        [JsonPropertyName("usage")]
+        public Usage Usage { get; set; } = new();
     }
 
     public class Choice
     {
+        [JsonPropertyName("index")]
+        public int Index { get; set; }
+        
+        [JsonPropertyName("message")]
         public Message Message { get; set; } = new();
+        
+        [JsonPropertyName("finish_reason")]
+        public string FinishReason { get; set; } = string.Empty;
+        
+        [JsonPropertyName("logprobs")]
+        public object? LogProbs { get; set; }
     }
 
     public class Message
     {
+        [JsonPropertyName("role")]
+        public string Role { get; set; } = "assistant";
+        
+        [JsonPropertyName("content")]
         public string Content { get; set; } = string.Empty;
+        
+        [JsonPropertyName("reasoning_content")]
+        public string? ReasoningContent { get; set; }
     }
 
-    /// <summary>
-    /// 多模态消息内容类型
-    /// </summary>
-    public class MultiModalContent
+    public class Usage
     {
+        [JsonPropertyName("prompt_tokens")]
+        public int PromptTokens { get; set; }
+        
+        [JsonPropertyName("completion_tokens")]
+        public int CompletionTokens { get; set; }
+        
+        [JsonPropertyName("total_tokens")]
+        public int TotalTokens { get; set; }
+        
+        [JsonPropertyName("prompt_tokens_details")]
+        public PromptTokensDetails? PromptTokensDetails { get; set; }
+        
+        [JsonPropertyName("completion_tokens_details")]
+        public CompletionTokensDetails? CompletionTokensDetails { get; set; }
+    }
+
+    public class PromptTokensDetails
+    {
+        [JsonPropertyName("cached_tokens")]
+        public int CachedTokens { get; set; }
+    }
+
+    public class CompletionTokensDetails
+    {
+        [JsonPropertyName("reasoning_tokens")]
+        public int ReasoningTokens { get; set; }
+    }
+
+    public class DoubaoError
+    {
+        public string Code { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
-        public string? Text { get; set; }
-        public ImageUrl? ImageUrl { get; set; }
     }
 
-    /// <summary>
-    /// 图片URL信息
-    /// </summary>
-    public class ImageUrl
+    public class DoubaoErrorResponse
     {
-        public string Url { get; set; } = string.Empty;
+        public DoubaoError Error { get; set; } = new();
     }
 
-    /// <summary>
-    /// 多模态消息类
-    /// </summary>
-    public class MultiModalMessage
-    {
-        public string Role { get; set; } = string.Empty;
-        public List<MultiModalContent> Content { get; set; } = new();
-    }
+
 
     /// <summary>
     /// 图片处理辅助类

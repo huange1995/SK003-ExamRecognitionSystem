@@ -14,7 +14,14 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // 閰嶇疆JSON搴忓垪鍖栭�夐」
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -33,7 +40,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// 配置默认文件映射 - 必须在 UseStaticFiles 之前
+// 锟斤拷锟斤拷默锟斤拷锟侥硷拷映锟斤拷 - 锟斤拷锟斤拷锟斤拷 UseStaticFiles 之前
 app.UseDefaultFiles(new DefaultFilesOptions
 {
     DefaultFileNames = { "index.html" }
@@ -50,10 +57,10 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
-// 系统信息端点
+// 系统锟斤拷息锟剿碉拷
 app.MapGet("/info", () => new
 {
-Application = "Semantic Kernel 试卷解析系统",
+Application = "Semantic Kernel 锟皆撅拷锟斤拷锟斤拷系统",
 Version = "1.0.0",
 Environment = app.Environment.EnvironmentName,
 MachineName = Environment.MachineName,

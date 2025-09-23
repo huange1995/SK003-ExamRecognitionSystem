@@ -74,9 +74,9 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
 
         // Use provided config or default
         var threadConfig = config ?? _defaultConfig;
-        
+
         // Estimate total questions (this would be refined after initial analysis)
-        session.TotalQuestions = await EstimateQuestionCountAsync(filePath, fileType);
+        session.TotalQuestions =  await EstimateQuestionCountAsync(filePath, fileType);
         
         // Create processing tasks based on thread configuration
         session.Tasks = CreateProcessingTasks(session.TotalQuestions, threadConfig);

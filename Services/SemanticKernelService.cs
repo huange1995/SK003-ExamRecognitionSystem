@@ -1,7 +1,8 @@
+using ExamRecognitionSystem.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
-using ExamRecognitionSystem.Models;
+using SixLabors.ImageSharp.Formats;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
@@ -75,13 +76,12 @@ public class SemanticKernelService : ISemanticKernelService
 
             // Add current request with image
             var userMessage = prompt;
+            chatHistory.AddUserMessage(userMessage);
             if (!string.IsNullOrEmpty(request.ImageBase64))
             {
-                userMessage += "\n[Image data provided for analysis]";
-                //userMessage += $"\n (data:image/png;base64,{request.ImageBase64})";
+                //userMessage += "\n[Image data provided for analysis]";
+          
             }
-            chatHistory.AddUserMessage(userMessage);
-
             // Configure execution settings
             var executionSettings = new OpenAIPromptExecutionSettings
             {
@@ -89,9 +89,13 @@ public class SemanticKernelService : ISemanticKernelService
                 Temperature = request.Temperature,
                 TopP = 0.9,
                 FrequencyPenalty = 0.1,
-                PresencePenalty = 0.1
+                PresencePenalty = 0.1,
+                ExtensionData=new Dictionary<string, object>
+                {
+                    { "base64Image", request.ImageBase64 },
+                    { "imageFormat", "png" }
+                }
             };
-            
             // Get response from the model
             var response = await _chatService.GetChatMessageContentAsync(chatHistory, executionSettings, _kernel, cancellationToken);
             
