@@ -16,6 +16,40 @@ public class FileUploadResponse
 }
 
 /// <summary>
+/// 多模态聊天请求DTO
+/// </summary>
+public class MultiModalChatRequest
+{
+    public string Prompt { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public string? Base64Image { get; set; }
+    public string ImageFormat { get; set; } = "png";
+    public double Temperature { get; set; } = 0.7;
+    public int MaxTokens { get; set; } = 2000;
+}
+
+/// <summary>
+/// 多模态聊天响应DTO
+/// </summary>
+public class MultiModalChatResponse
+{
+    public bool Success { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public string? ErrorMessage { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// 图片验证响应DTO
+/// </summary>
+public class ImageValidationResponse
+{
+    public bool IsValid { get; set; }
+    public string? ErrorMessage { get; set; }
+    public string? ImageType { get; set; }
+}
+
+/// <summary>
 /// Request for starting processing
 /// </summary>
 public class ProcessingStartRequest
