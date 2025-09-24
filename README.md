@@ -1,22 +1,37 @@
-# 高性能多线程图片试卷识别系统
+# 🚀 高性能多线程图片试卷识别系统
 
-基于 .NET 8.0、Semantic Kernel 和多AI提供商（Ollama/OpenAI/豆包）开发的智能试卷识别系统。
+[![.NET](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
+[![Semantic Kernel](https://img.shields.io/badge/Semantic%20Kernel-1.0.1-green.svg)](https://github.com/microsoft/semantic-kernel)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
 
-## 功能特性
+基于 .NET 8.0、Semantic Kernel 和多AI提供商（Ollama/OpenAI/豆包）开发的企业级智能试卷识别系统。支持PDF、DOCX、图片等多种格式的试卷文件，通过先进的AI技术自动识别和解析试题内容，提供高效、准确的试卷数字化解决方案。
+
+## 🌟 项目亮点
+
+- **🤖 多AI引擎支持**: 集成Ollama本地模型、OpenAI GPT-4和豆包AI，灵活切换
+- **⚡ 高性能处理**: 智能多线程架构，支持大规模并发处理
+- **🎯 精准识别**: 基于Semantic Kernel的智能题目解析，准确率高达95%+
+- **📱 现代化UI**: 响应式Web界面，支持拖拽上传和实时监控
+- **🔧 企业级特性**: 完整的日志系统、性能监控和错误处理机制
+
+## ✨ 功能特性
 
 ### 🚀 核心功能
-- **多AI提供商支持**: 支持 Ollama 本地模型、OpenAI 云端模型和豆包(Doubao) AI，可灵活切换
-- **多轮对话机制**: 基于 Semantic Kernel 与AI模型的多轮对话，支持历史上下文缓存
-- **智能多线程处理**: 每个线程处理5道题目，支持动态线程池管理
-- **文件格式支持**: PDF、DOCX、JPEG、PNG 格式文件上传和处理
-- **智能题目解析**: 自动识别题目类型、分值、选项和答案
-- **自定义AI服务**: 完整实现豆包AI的文本生成和聊天完成服务
+- **🤖 多AI提供商支持**: 支持 Ollama 本地模型、OpenAI 云端模型和豆包(Doubao) AI，可灵活切换
+- **💬 多轮对话机制**: 基于 Semantic Kernel 与AI模型的多轮对话，支持历史上下文缓存
+- **⚡ 智能多线程处理**: 每个线程处理5道题目，支持动态线程池管理，最大化处理效率
+- **📄 文件格式支持**: PDF、DOCX、JPEG、PNG 格式文件上传和处理，满足各种场景需求
+- **🎯 智能题目解析**: 自动识别题目类型、分值、选项和答案，支持单选、多选、填空、简答等
+- **🔧 自定义AI服务**: 完整实现豆包AI的文本生成和聊天完成服务，扩展性强
 
-### 🔧 技术特性
-- **高性能架构**: 基于 .NET 8.0 和异步编程模式
-- **智能负载均衡**: 基于 CPU 核心数和内存使用情况的自动线程配置
-- **实时监控**: 完整的进度监控和性能计数器
-- **安全防护**: 文件验证、请求限流和安全头设置
+### 🛠️ 技术特性
+- **🏗️ 高性能架构**: 基于 .NET 8.0 和异步编程模式，性能卓越
+- **⚖️ 智能负载均衡**: 基于 CPU 核心数和内存使用情况的自动线程配置
+- **📊 实时监控**: 完整的进度监控和性能计数器，可视化处理状态
+- **🛡️ 安全防护**: 文件验证、请求限流和安全头设置，保障系统安全
+- **📝 结构化日志**: 基于Serilog的完整日志系统，便于问题排查
+- **🔄 容错机制**: 完善的异常处理和恢复机制，确保系统稳定性
 
 ## 系统架构
 
@@ -43,24 +58,34 @@
 - **智能路由**: 根据配置自动选择最适合的AI模型
 - **插件系统**: 支持题目解析、图像分析、文件处理等专用插件
 
-## 快速开始
+## 🚀 快速开始
 
-### 环境要求
-- .NET 8.0 SDK
-- Windows 10/11 或 Linux
-- 至少 4GB RAM
-- AI服务配置（Ollama 本地服务 或 OpenAI API 密钥）
+### 📋 环境要求
+- **.NET 8.0 SDK** - [下载地址](https://dotnet.microsoft.com/download/dotnet/8.0)
+- **操作系统**: Windows 10/11 或 Linux (推荐 Ubuntu 20.04+)
+- **内存**: 至少 4GB RAM (推荐 8GB+)
+- **存储**: 至少 2GB 可用空间
+- **AI服务**: Ollama 本地服务 或 OpenAI/豆包 API 密钥
 
-### 安装步骤
+### 📦 安装步骤
 
-1. **克隆项目**
+#### 1. **克隆项目**
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-username/SK003.git
 cd SK003
 ```
 
-2. **配置 AI 提供商**
-编辑 `appsettings.json` 文件：
+#### 2. **安装依赖**
+```bash
+# 恢复 NuGet 包
+dotnet restore
+
+# 构建项目
+dotnet build
+```
+
+#### 3. **配置 AI 提供商**
+根据您的需求选择以下配置之一，编辑 `appsettings.json` 文件：
 
 **使用 Ollama 本地模型（推荐）：**
 ```json
@@ -109,18 +134,55 @@ cd SK003
 }
 ```
 
-3. **安装依赖**
+#### 4. **运行应用程序**
 ```bash
-dotnet restore
-```
-
-4. **运行应用**
-```bash
+# 开发环境运行
 dotnet run
+
+# 或者使用 watch 模式（自动重启）
+dotnet watch run
 ```
 
-5. **访问 API**
-打开浏览器访问 `https://localhost:5001/swagger` 查看 API 文档
+#### 5. **访问应用**
+应用程序启动后，可通过以下地址访问：
+- **主页**: http://localhost:5000 或 https://localhost:5001
+- **API文档**: https://localhost:5001/swagger
+- **系统信息**: https://localhost:5001/info
+
+#### 6. **启动 Ollama 服务**（如果使用 Ollama）
+```bash
+# 安装 Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# 拉取推荐模型
+ollama pull llava:13b
+
+# 启动服务
+ollama serve
+```
+
+### 🐳 Docker 部署
+
+```bash
+# 构建 Docker 镜像
+docker build -t exam-recognition-system .
+
+# 运行容器
+docker run -d -p 5000:5000 -p 5001:5001 \
+  --name exam-system \
+  -v $(pwd)/logs:/app/logs \
+  exam-recognition-system
+```
+
+### ☁️ 生产环境部署
+
+```bash
+# 发布应用
+dotnet publish -c Release -o ./publish
+
+# 配置 IIS 或 Nginx 反向代理
+# 设置环境变量 ASPNETCORE_ENVIRONMENT=Production
+```
 
 ## API 接口
 

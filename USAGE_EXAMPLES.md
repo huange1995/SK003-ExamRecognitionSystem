@@ -1,8 +1,8 @@
-# 使用示例
+# 📚 使用示例
 
-## 基本使用流程
+## 🚀 基本使用流程
 
-### 1. 启动应用程序
+### 1️⃣ 启动应用程序
 ```bash
 dotnet run
 ```
@@ -12,7 +12,7 @@ dotnet run
 - HTTPS: `https://localhost:5001`
 - Swagger UI: `https://localhost:5001/swagger`
 
-### 2. 上传试卷文件
+### 2️⃣ 上传试卷文件
 
 使用 curl 上传文件：
 ```bash
@@ -36,7 +36,7 @@ curl -X POST "https://localhost:5001/api/fileupload/upload" \
 }
 ```
 
-### 3. 开始处理
+### 3️⃣ 开始处理
 
 ```bash
 curl -X POST "https://localhost:5001/api/fileupload/start-processing" \
@@ -50,7 +50,7 @@ curl -X POST "https://localhost:5001/api/fileupload/start-processing" \
      }'
 ```
 
-### 4. 监控处理进度
+### 4️⃣ 监控处理进度
 
 ```bash
 curl -X GET "https://localhost:5001/api/monitoring/status/abc123-def456-ghi789"
@@ -95,7 +95,7 @@ curl -X GET "https://localhost:5001/api/monitoring/status/abc123-def456-ghi789"
 }
 ```
 
-### 5. 获取解析结果
+### 5️⃣ 获取解析结果
 
 ```bash
 curl -X GET "https://localhost:5001/api/monitoring/questions/abc123-def456-ghi789"
@@ -138,9 +138,9 @@ curl -X GET "https://localhost:5001/api/monitoring/questions/abc123-def456-ghi78
 }
 ```
 
-## 高级使用场景
+## 🔧 高级使用场景
 
-### 批量处理多个文件
+### 📁 批量处理多个文件
 
 ```python
 import requests
@@ -206,7 +206,7 @@ file_paths = ['exam1.pdf', 'exam2.docx', 'exam3.jpg']
 process_exam_files(file_paths)
 ```
 
-### 自定义处理配置
+### ⚙️ 自定义处理配置
 
 ```javascript
 // JavaScript 示例 - 动态调整处理配置
@@ -240,7 +240,7 @@ async function processWithOptimalConfig(sessionId, fileSize) {
 }
 ```
 
-### 实时进度监控 (WebSocket 风格)
+### 📊 实时进度监控 (WebSocket 风格)
 
 ```python
 import asyncio
@@ -271,9 +271,9 @@ async def monitor_progress_realtime(session_id):
 # asyncio.run(monitor_progress_realtime('your-session-id'))
 ```
 
-## 错误处理示例
+## ⚠️ 错误处理示例
 
-### 处理上传错误
+### 📤 处理上传错误
 
 ```python
 def safe_upload_file(file_path):
@@ -308,7 +308,7 @@ def safe_upload_file(file_path):
     return None
 ```
 
-### 处理超时和重试
+### 🔄 处理超时和重试
 
 ```python
 import time
@@ -343,9 +343,9 @@ def get_processing_status(session_id):
     return response.json()
 ```
 
-## 性能监控示例
+## 📈 性能监控示例
 
-### 监控系统健康状态
+### 💚 监控系统健康状态
 
 ```bash
 # 检查系统健康状态
@@ -359,7 +359,7 @@ curl -X GET "https://localhost:5001/api/monitoring/export/abc123-def456-ghi789" 
      -o exam_results.json
 ```
 
-### 自动化性能报告
+### 📋 自动化性能报告
 
 ```python
 def generate_performance_report():
@@ -391,9 +391,9 @@ def generate_performance_report():
     return report
 ```
 
-## 配置优化建议
+## 🚀 配置优化建议
 
-### 根据硬件配置调整参数
+### 🖥️ 根据硬件配置调整参数
 
 ```json
 // 高性能服务器配置 (16核心, 32GB内存)
