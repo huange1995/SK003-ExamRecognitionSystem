@@ -289,13 +289,12 @@ function updateProgress() {
             if (response.success) {
                 const data = response.data;
                 updateProgressDisplay(data);
-                
                 // Check if processing is complete
-                if (data.status === 'Completed') {
+                if (data.status === 4) { // Completed
                     processingCompleted();
-                } else if (data.status === 'Failed') {
+                } else if (data.status === 5) { // Failed
                     processingFailed(data.errorMessage);
-                } else if (data.status === 'Cancelled') {
+                } else if (data.status === 6) { // Cancelled
                     processingCancelled();
                 }
             }
@@ -353,7 +352,6 @@ function updateThreadStatus(taskStatuses) {
 function processingCompleted() {
     clearInterval(progressTimer);
     isProcessing = false;
-    
     showToast('success', '处理成功完成！');
     
     // Load results
