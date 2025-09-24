@@ -85,7 +85,7 @@ public class PerformanceMetricsDto
 }
 
 /// <summary>
-/// Response containing extracted questions
+/// 包含提取题目的响应
 /// </summary>
 public class QuestionsResponse
 {
@@ -98,7 +98,7 @@ public class QuestionsResponse
 }
 
 /// <summary>
-/// Exam question DTO
+/// 考试题目DTO
 /// </summary>
 public class ExamQuestionDto
 {
@@ -109,11 +109,19 @@ public class ExamQuestionDto
     public List<string> Options { get; set; } = new();
     public string? Answer { get; set; }
     public string? Explanation { get; set; }
-    public string TypeDisplayName => Type.ToString();
+    public string TypeDisplayName => Type switch
+    {
+        QuestionType.SingleChoice => "单选题",
+        QuestionType.MultipleChoice => "多选题",
+        QuestionType.FillInBlank => "填空题",
+        QuestionType.ShortAnswer => "简答题",
+        QuestionType.Essay => "论述题",
+        _ => "未知题型"
+    };
 }
 
 /// <summary>
-/// Generic API response wrapper
+/// 通用API响应包装器
 /// </summary>
 public class ApiResponse<T>
 {

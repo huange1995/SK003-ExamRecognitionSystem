@@ -42,13 +42,13 @@ public class FileUploadController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Received file upload request: {FileName} ({Size} bytes)",
+            _logger.LogInformation("收到文件上传请求：{FileName}（{Size} 字节）",
                 file?.FileName, file?.Length);
 
             if (file == null)
             {
                 return BadRequest(ApiResponse<FileUploadResponse>.ErrorResult(
-                    "No file provided", new List<string> { "File is required" }));
+                    "未提供文件", new List<string> { "文件是必需的" }));
             }
 
             // 上传文件
@@ -57,7 +57,7 @@ public class FileUploadController : ControllerBase
             if (!success)
             {
                 return BadRequest(ApiResponse<FileUploadResponse>.ErrorResult(
-                    "File upload failed", errors));
+                    "文件上传失败", errors));
             }
 
             // 获取文件路径用于创建会话
@@ -65,7 +65,7 @@ public class FileUploadController : ControllerBase
             if (string.IsNullOrEmpty(filePath))
             {
                 return BadRequest(ApiResponse<FileUploadResponse>.ErrorResult(
-                    "Failed to retrieve uploaded file"));
+                    "获取上传文件失败"));
             }
 
             // 创建处理会话
@@ -76,20 +76,20 @@ public class FileUploadController : ControllerBase
             {
                 Success = true,
                 SessionId = processingSessionId,
-                Message = "File uploaded successfully",
+                Message = "文件上传成功",
                 FileName = file.FileName,
                 FileSizeBytes = file.Length
             };
 
-            _logger.LogInformation("File upload completed successfully. Session ID: {SessionId}", processingSessionId);
+            _logger.LogInformation("文件上传成功完成。会话ID：{SessionId}", processingSessionId);
 
-            return Ok(ApiResponse<FileUploadResponse>.SuccessResult(response, "File uploaded successfully"));
+            return Ok(ApiResponse<FileUploadResponse>.SuccessResult(response, "文件上传成功"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during file upload: {Error}", ex.Message);
+            _logger.LogError(ex, "文件上传过程中发生错误：{Error}", ex.Message);
             return StatusCode(500, ApiResponse<FileUploadResponse>.ErrorResult(
-                "Internal server error during file upload", new List<string> { ex.Message }));
+                "文件上传过程中发生内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -106,30 +106,30 @@ public class FileUploadController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Starting processing for session {SessionId}", request.SessionId);
+            _logger.LogInformation("开始处理会话 {SessionId}", request.SessionId);
 
             var session = await _threadPoolManager.GetSessionAsync(request.SessionId);
             if (session == null)
             {
                 return NotFound(ApiResponse<ProcessingStatusResponse>.ErrorResult(
-                    $"Session {request.SessionId} not found"));
+                    $"会话 {request.SessionId} 未找到"));
             }
 
             var started = await _threadPoolManager.StartProcessingAsync(request.SessionId, cancellationToken);
             if (!started)
             {
                 return BadRequest(ApiResponse<ProcessingStatusResponse>.ErrorResult(
-                    "Failed to start processing. Check session status."));
+                    "启动处理失败。请检查会话状态。"));
             }
 
             var statusResponse = MapToStatusResponse(session);
-            return Ok(ApiResponse<ProcessingStatusResponse>.SuccessResult(statusResponse, "Processing started successfully"));
+            return Ok(ApiResponse<ProcessingStatusResponse>.SuccessResult(statusResponse, "处理启动成功"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting processing for session {SessionId}: {Error}", request.SessionId, ex.Message);
+            _logger.LogError(ex, "启动会话 {SessionId} 处理时发生错误：{Error}", request.SessionId, ex.Message);
             return StatusCode(500, ApiResponse<ProcessingStatusResponse>.ErrorResult(
-                "Internal server error during processing start", new List<string> { ex.Message }));
+                "启动处理时发生内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -143,22 +143,22 @@ public class FileUploadController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Cancelling processing for session {SessionId}", sessionId);
+            _logger.LogInformation("取消会话 {SessionId} 的处理", sessionId);
 
             var cancelled = await _threadPoolManager.CancelProcessingAsync(sessionId);
             if (!cancelled)
             {
                 return NotFound(ApiResponse<bool>.ErrorResult(
-                    $"Session {sessionId} not found or cannot be cancelled"));
+                    $"会话 {sessionId} 未找到或无法取消"));
             }
 
-            return Ok(ApiResponse<bool>.SuccessResult(true, "Processing cancelled successfully"));
+            return Ok(ApiResponse<bool>.SuccessResult(true, "处理已成功取消"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error cancelling processing for session {SessionId}: {Error}", sessionId, ex.Message);
+            _logger.LogError(ex, "取消会话 {SessionId} 处理时发生错误：{Error}", sessionId, ex.Message);
             return StatusCode(500, ApiResponse<bool>.ErrorResult(
-                "Internal server error during processing cancellation", new List<string> { ex.Message }));
+                "取消处理时发生内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -172,7 +172,7 @@ public class FileUploadController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Deleting file for session {SessionId}", sessionId);
+            _logger.LogInformation("删除会话 {SessionId} 的文件", sessionId);
 
             // 如果仍在运行则取消处理
             await _threadPoolManager.CancelProcessingAsync(sessionId);
@@ -181,13 +181,13 @@ public class FileUploadController : ControllerBase
             var deleted = await _fileUploadService.DeleteFileAsync(sessionId);
 
             return Ok(ApiResponse<bool>.SuccessResult(deleted, 
-                deleted ? "File deleted successfully" : "File not found or already deleted"));
+                deleted ? "文件删除成功" : "文件未找到或已删除"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting file for session {SessionId}: {Error}", sessionId, ex.Message);
+            _logger.LogError(ex, "删除会话 {SessionId} 文件时发生错误：{Error}", sessionId, ex.Message);
             return StatusCode(500, ApiResponse<bool>.ErrorResult(
-                "Internal server error during file deletion", new List<string> { ex.Message }));
+                "删除文件时发生内部服务器错误", new List<string> { ex.Message }));
         }
     }
 

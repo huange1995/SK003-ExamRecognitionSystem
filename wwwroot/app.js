@@ -4,7 +4,7 @@ let progressTimer = null;
 let currentQuestions = [];
 let isProcessing = false;
 
-// API configuration
+// API配置
 const API_BASE = window.location.origin;
 const API_ENDPOINTS = {
     upload: `${API_BASE}/api/fileupload/upload`,
@@ -16,46 +16,46 @@ const API_ENDPOINTS = {
     exportResults: (sessionId) => `${API_BASE}/api/monitoring/export/${sessionId}`
 };
 
-// Initialize application
+// 初始化应用程序
 $(document).ready(function() {
     initializeEventHandlers();
     checkSystemHealth();
     
-    // Check system health every 30 seconds
+    // 每30秒检查一次系统健康状态
     setInterval(checkSystemHealth, 30000);
 });
 
-// Event handlers
+// 事件处理器
 function initializeEventHandlers() {
-    // Unbind all events first to prevent duplicate binding
+    // 首先解绑所有事件以防止重复绑定
     $('#browseBtn').off('click');
     $('#fileInput').off('change');
     $('#uploadArea').off('click dragover dragleave drop');
     
-    // File upload handlers
+    // 文件上传处理器
     $('#browseBtn').click(function(e) {
         e.preventDefault();
-        e.stopPropagation(); // Prevent event bubbling
+        e.stopPropagation(); // 防止事件冒泡
         $('#fileInput').trigger('click');
     });
     $('#fileInput').change(handleFileSelect);
     
-    // Drag and drop handlers
+    // 拖拽处理器
     $('#uploadArea')
         .on('dragover', handleDragOver)
         .on('dragleave', handleDragLeave)
         .on('drop', handleFileDrop)
         .click(function(e) {
-            // Only trigger file selection when clicking is not on button or its child elements
+            // 只有在不点击按钮或其子元素时才触发文件选择
             if (!$(e.target).closest('#browseBtn').length && e.target !== this) {
-                return; // Avoid triggering in button area
+                return; // 避免在按钮区域触发
             }
             if (e.target === this) {
                 $('#fileInput').trigger('click');
             }
         });
     
-    // Action buttons
+    // 操作按钮
     $('#removeFile').click(clearFileSelection);
     $('#startProcessing').click(startProcessing);
     $('#cancelUpload').click(clearFileSelection);
@@ -63,17 +63,17 @@ function initializeEventHandlers() {
     $('#exportResults').click(exportResults);
     $('#newUpload').click(resetToUpload);
     
-    // Filter handlers
+    // 过滤器处理器
     $('#typeFilter').change(filterQuestions);
     $('#searchInput').on('input', filterQuestions);
     
-    // Prevent document's default drag behavior
+    // 防止文档的默认拖拽行为
     $(document).on('dragover drop', function(e) {
         e.preventDefault();
     });
 }
 
-// System health check
+// 系统健康检查
 function checkSystemHealth() {
     $.ajax({
         url: API_ENDPOINTS.getHealth,
@@ -99,7 +99,7 @@ function updateSystemStatus(status, text) {
     statusText.text(text);
 }
 
-// File handling
+// 文件处理
 function handleDragOver(e) {
     e.preventDefault();
     $(this).addClass('dragover');
@@ -128,7 +128,7 @@ function handleFileSelect(e) {
 }
 
 function handleFile(file) {
-    // Validate file
+    // 验证文件
     const validTypes = ['.pdf', '.docx', '.jpeg', '.jpg', '.png'];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
     
@@ -142,7 +142,7 @@ function handleFile(file) {
         return;
     }
     
-    // Display file preview
+    // 显示文件预览
     displayFilePreview(file);
 }
 
@@ -150,7 +150,7 @@ function displayFilePreview(file) {
     $('#fileName').text(file.name);
     $('#fileSize').text(formatFileSize(file.size));
     
-    // Set file icon based on type
+    // 根据类型设置文件图标
     const extension = file.name.split('.').pop().toLowerCase();
     let iconClass = 'fas fa-file';
     
@@ -170,7 +170,7 @@ function displayFilePreview(file) {
     
     $('.file-icon i').attr('class', iconClass);
     
-    // Show preview and configuration sections
+    // 显示预览和配置部分
     $('#uploadArea').hide();
     $('#filePreview').show();
     $('#processingConfig').show();
@@ -185,7 +185,7 @@ function clearFileSelection() {
     $('#uploadActions').hide();
 }
 
-// Processing functions
+// 处理函数
 function startProcessing() {
     const file = $('#fileInput')[0].files[0];
     if (!file) {
@@ -193,14 +193,14 @@ function startProcessing() {
         return;
     }
     
-    // Show loading state
+    // 显示加载状态
     showLoading('正在上传文件...');
     
-    // Create form data
+    // 创建表单数据
     const formData = new FormData();
     formData.append('file', file);
     
-    // Upload file
+    // 上传文件
     $.ajax({
         url: API_ENDPOINTS.upload,
         method: 'POST',
@@ -218,7 +218,7 @@ function startProcessing() {
         },
         error: function(xhr) {
             hideLoading();
-            const errorMsg = xhr.responseJSON?.message || 'Upload failed';
+            const errorMsg = xhr.responseJSON?.message || '上传失败';
             showToast('error', errorMsg);
         }
     });
@@ -246,7 +246,7 @@ function startProcessingSession() {
                 showProcessingSection();
                 startProgressMonitoring();
                 isProcessing = true;
-                showToast('success', 'Processing started successfully');
+                showToast('success', '处理启动成功');
             } else {
                 hideLoading();
                 showToast('error', response.message || '启动处理失败');
@@ -266,16 +266,16 @@ function showProcessingSection() {
 }
 
 function startProgressMonitoring() {
-    // First clear any existing timer
+    // 首先清除任何现有的计时器
     if (progressTimer) {
         clearInterval(progressTimer);
         progressTimer = null;
     }
     
-    // Update progress immediately
+    // 立即更新进度
     updateProgress();
     
-    // Set timer for progress updates
+    // 设置进度更新计时器
     progressTimer = setInterval(updateProgress, 2000);
 }
 
@@ -289,12 +289,12 @@ function updateProgress() {
             if (response.success) {
                 const data = response.data;
                 updateProgressDisplay(data);
-                // Check if processing is completed
-                if (data.status === 4) { // Completed
+                // 检查处理是否完成
+                if (data.status === 4) { // 已完成
                     processingCompleted();
-                } else if (data.status === 5) { // Failed
+                } else if (data.status === 5) { // 失败
                     processingFailed(data.errorMessage);
-                } else if (data.status === 6) { // Cancelled
+                } else if (data.status === 6) { // 已取消
                     processingCancelled();
                 }
             }
@@ -308,21 +308,21 @@ function updateProgress() {
 }
 
 function updateProgressDisplay(data) {
-    // Update statistics
+    // 更新统计信息
     $('#completedQuestions').text(data.completedQuestions);
     $('#totalQuestions').text(data.totalQuestions);
     $('#processingSpeed').text(data.metrics.questionsPerSecond);
     $('#activeThreads').text(data.metrics.activeThreads);
     
-    // Update progress bar
+    // 更新进度条
     const percentage = data.progressPercentage;
     $('#progressFill').css('width', percentage + '%');
     $('#progressText').text(Math.round(percentage) + '%');
     
-    // Update thread status
+    // 更新线程状态
     updateThreadStatus(data.taskStatuses);
     
-    // Update performance metrics
+    // 更新性能指标
     $('#cpuUsage').text(data.metrics.cpuUsagePercent.toFixed(1) + '%');
     $('#memoryUsage').text(formatBytes(data.metrics.memoryUsageBytes));
     $('#processingTime').text(formatDuration(data.metrics.processingDuration));
@@ -333,7 +333,7 @@ function updateThreadStatus(taskStatuses) {
     threadList.empty();
     
     taskStatuses.forEach(task => {
-        // Ensure task.status is string type
+        // 确保task.status是字符串类型
         const status = task.status ? String(task.status) : 'unknown';
         const statusClass = `status-${status.toLowerCase().replace('progress', 'inprogress')}`;
         const threadItem = $(`
@@ -354,7 +354,7 @@ function processingCompleted() {
     isProcessing = false;
     showToast('success', '处理成功完成！');
     
-    // Load results
+    // 加载结果
     loadResults();
 }
 
@@ -393,7 +393,7 @@ function cancelProcessing() {
     });
 }
 
-// Result handling
+// 结果处理
 function loadResults() {
     $.ajax({
         url: API_ENDPOINTS.getQuestions(currentSessionId),
@@ -416,12 +416,12 @@ function showResultsSection(data) {
     $('#progressSection').hide();
     $('#resultsSection').show();
     
-    // Update summary
+    // 更新摘要
     $('#totalExtracted').text(data.totalQuestions);
     $('#finalProcessingTime').text(formatDuration(data.metrics.processingDuration));
     $('#averageSpeed').text(data.metrics.questionsPerSecond + ' Q/s');
     
-    // Display questions
+    // 显示题目
     displayQuestions(currentQuestions);
 }
 
@@ -458,7 +458,7 @@ function createQuestionElement(question) {
     
     let answerHtml = '';
     if (question.answer) {
-        answerHtml = `<div class="question-answer"><strong>Answer:</strong> ${escapeHtml(question.answer)}</div>`;
+        answerHtml = `<div class="question-answer"><strong>答案:</strong> ${escapeHtml(question.answer)}</div>`;
     }
     
     return $(`
@@ -468,7 +468,7 @@ function createQuestionElement(question) {
                     <span class="question-number">Q${question.questionNumber}</span>
                     <span class="question-type" style="background-color: ${typeColor}; color: white;">${question.typeDisplayName}</span>
                 </div>
-                <div class="question-points">${question.points} pts</div>
+                <div class="question-points">${question.points} 分</div>
             </div>
             <div class="question-content">${escapeHtml(question.content)}</div>
             ${optionsHtml}
@@ -488,12 +488,12 @@ function filterQuestions() {
         
         let visible = true;
         
-        // Type filtering
+        // 类型过滤
         if (typeFilter !== 'all' && itemType !== typeFilter) {
             visible = false;
         }
         
-        // Search filtering
+        // 搜索过滤
         if (searchText && !itemContent.includes(searchText)) {
             visible = false;
         }
@@ -502,7 +502,7 @@ function filterQuestions() {
     });
 }
 
-// Export and reset functions
+// 导出和重置函数
 function exportResults() {
     if (!currentSessionId) return;
     
@@ -517,31 +517,31 @@ function exportResults() {
 }
 
 function resetToUpload() {
-    // Clear data
+    // 清除数据
     currentSessionId = null;
     currentQuestions = [];
     isProcessing = false;
     
-    // Clear timer
+    // 清除计时器
     if (progressTimer) {
         clearInterval(progressTimer);
         progressTimer = null;
     }
     
-    // Reset interface
+    // 重置界面
     clearFileSelection();
     $('#progressSection').hide();
     $('#resultsSection').hide();
     $('.upload-section').show();
     
-    // Reset form values
+    // 重置表单值
     $('#questionsPerThread').val(5);
     $('#maxThreads').val(4);
     $('#typeFilter').val('all');
     $('#searchInput').val('');
 }
 
-// Utility functions
+// 工具函数
 function showLoading(text = '加载中...') {
     $('#loadingText').text(text);
     $('#loadingOverlay').show();
@@ -571,15 +571,15 @@ function showToast(type, message, duration = 5000) {
         </div>
     `);
     
-    // Add click handler for close button
+    // 为关闭按钮添加点击处理器
     toast.find('.toast-close').click(function() {
         toast.remove();
     });
     
-    // Add to container
+    // 添加到容器
     $('#toastContainer').append(toast);
     
-    // Auto remove after duration
+    // 持续时间后自动移除
     setTimeout(() => {
         toast.fadeOut(300, () => toast.remove());
     }, duration);
@@ -600,12 +600,12 @@ function formatBytes(bytes) {
 }
 
 function formatDuration(duration) {
-    // Duration passed as TimeSpan string, e.g. "00:02:15"
+    // 持续时间以TimeSpan字符串形式传递，例如 "00:02:15"
     if (typeof duration === 'string') {
         return duration;
     }
     
-    // If in milliseconds
+    // 如果是毫秒
     const totalSeconds = Math.floor(duration / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -620,12 +620,12 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Handle browser forward/back
+// 处理浏览器前进/后退
 window.addEventListener('popstate', function() {
-    // Handle navigation if needed
+    // 如需要处理导航
 });
 
-// Handle page unload
+// 处理页面卸载
 window.addEventListener('beforeunload', function(e) {
     if (isProcessing) {
         e.preventDefault();

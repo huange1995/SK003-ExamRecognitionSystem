@@ -52,7 +52,7 @@ namespace ExamRecognitionSystem.Extensions
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Doubao API request failed: {response.StatusCode}, {errorContent}");
+                throw new HttpRequestException($"豆包API请求失败：{response.StatusCode}, {errorContent}");
             }
 
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -143,7 +143,7 @@ namespace ExamRecognitionSystem.Extensions
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Doubao API request failed: {response.StatusCode}, {errorContent}");
+                throw new HttpRequestException($"豆包API请求失败：{response.StatusCode}, {errorContent}");
             }
 
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);

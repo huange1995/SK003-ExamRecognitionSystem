@@ -43,7 +43,7 @@ public class MonitoringController : ControllerBase
             if (session == null)
             {
                 return NotFound(ApiResponse<ProcessingStatusResponse>.ErrorResult(
-                    $"Session {sessionId} not found"));
+                    $"会话 {sessionId} 未找到"));
             }
 
             var statusResponse = new ProcessingStatusResponse
@@ -79,9 +79,9 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting status for session {SessionId}: {Error}", sessionId, ex.Message);
+            _logger.LogError(ex, "获取会话 {SessionId} 状态时发生错误：{Error}", sessionId, ex.Message);
             return StatusCode(500, ApiResponse<ProcessingStatusResponse>.ErrorResult(
-                "Internal server error", new List<string> { ex.Message }));
+                "内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -116,9 +116,9 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting active sessions: {Error}", ex.Message);
+            _logger.LogError(ex, "获取活跃会话时发生错误：{Error}", ex.Message);
             return StatusCode(500, ApiResponse<List<ProcessingStatusResponse>>.ErrorResult(
-                "Internal server error", new List<string> { ex.Message }));
+                "内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -136,13 +136,13 @@ public class MonitoringController : ControllerBase
             if (session == null)
             {
                 return NotFound(ApiResponse<QuestionsResponse>.ErrorResult(
-                    $"Session {sessionId} not found"));
+                    $"会话 {sessionId} 未找到"));
             }
 
             if (session.Status != SessionStatus.Completed)
             {
                 return BadRequest(ApiResponse<QuestionsResponse>.ErrorResult(
-                    $"Session {sessionId} is not completed. Current status: {session.Status}"));
+                    $"会话 {sessionId} 未完成。当前状态：{session.Status}"));
             }
 
             var questionsResponse = new QuestionsResponse
@@ -173,9 +173,9 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting questions for session {SessionId}: {Error}", sessionId, ex.Message);
+            _logger.LogError(ex, "获取会话 {SessionId} 题目时发生错误：{Error}", sessionId, ex.Message);
             return StatusCode(500, ApiResponse<QuestionsResponse>.ErrorResult(
-                "Internal server error", new List<string> { ex.Message }));
+                "内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -202,9 +202,9 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting current performance metrics: {Error}", ex.Message);
+            _logger.LogError(ex, "获取当前性能指标时发生错误：{Error}", ex.Message);
             return StatusCode(500, ApiResponse<PerformanceMetricsDto>.ErrorResult(
-                "Internal server error", new List<string> { ex.Message }));
+                "内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -235,9 +235,9 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting performance history: {Error}", ex.Message);
+            _logger.LogError(ex, "获取性能历史记录时发生错误：{Error}", ex.Message);
             return StatusCode(500, ApiResponse<List<PerformanceMetricsDto>>.ErrorResult(
-                "Internal server error", new List<string> { ex.Message }));
+                "内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -274,9 +274,9 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting system health: {Error}", ex.Message);
+            _logger.LogError(ex, "获取系统健康状态时发生错误：{Error}", ex.Message);
             return StatusCode(500, ApiResponse<SystemHealthDto>.ErrorResult(
-                "Internal server error", new List<string> { ex.Message }));
+                "内部服务器错误", new List<string> { ex.Message }));
         }
     }
 
@@ -330,7 +330,7 @@ public class MonitoringController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error exporting questions for session {SessionId}: {Error}", sessionId, ex.Message);
+            _logger.LogError(ex, "导出会话 {SessionId} 题目时发生错误：{Error}", sessionId, ex.Message);
             return StatusCode(500, "导出过程中发生内部服务器错误");
         }
     }

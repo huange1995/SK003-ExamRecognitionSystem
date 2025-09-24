@@ -135,7 +135,7 @@ public class RequestLoggingMiddleware
             context.Request.Path,
             context.Connection.RemoteIpAddress);
 
-        // Add request ID to response headers
+        // 将请求ID添加到响应头
         context.Response.Headers["X-Request-ID"] = requestId;
 
         try
@@ -156,7 +156,7 @@ public class RequestLoggingMiddleware
 }
 
 /// <summary>
-/// API rate limiting middleware
+/// API限流中间件
 /// </summary>
 public class RateLimitingMiddleware
 {
@@ -213,7 +213,7 @@ public class RateLimitingMiddleware
 
     private string GetClientIdentifier(HttpContext context)
     {
-        // Use IP address as client identifier (in production, consider using user ID or API key)
+        // 使用IP地址作为客户端标识符（在生产环境中，考虑使用用户ID或API密钥）
         return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     }
 

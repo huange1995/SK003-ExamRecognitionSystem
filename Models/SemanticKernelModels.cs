@@ -54,7 +54,7 @@ public class AIProviderSettings
 }
 
 /// <summary>
-/// Represents conversation history for multi-turn dialogue
+/// 表示多轮对话的会话历史
 /// </summary>
 public class ConversationHistory
 {
@@ -67,7 +67,7 @@ public class ConversationHistory
 }
 
 /// <summary>
-/// A single message in the conversation
+/// 会话中的单条消息
 /// </summary>
 public class ConversationMessage
 {
@@ -79,7 +79,7 @@ public class ConversationMessage
 }
 
 /// <summary>
-/// Vision analysis request for image processing
+/// 图像处理的视觉分析请求
 /// </summary>
 public class VisionAnalysisRequest
 {
@@ -92,7 +92,7 @@ public class VisionAnalysisRequest
 }
 
 /// <summary>
-/// Response from vision analysis
+/// 视觉分析的响应
 /// </summary>
 public class VisionAnalysisResponse
 {

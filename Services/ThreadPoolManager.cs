@@ -55,7 +55,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         // 设置清理定时器每5分钟运行一次
         _cleanupTimer = new Timer(async _ => await CleanupCompletedSessionsAsync(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
         
-        _logger.LogInformation("ThreadPoolManager initialized with max {MaxThreads} concurrent threads, {QuestionsPerThread} questions per thread",
+        _logger.LogInformation("线程池管理器已初始化，最大并发线程数：{MaxThreads}，每线程处理题目数：{QuestionsPerThread}",
             _defaultConfig.MaxConcurrentThreads, _defaultConfig.QuestionsPerThread);
     }
 
@@ -83,7 +83,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         
         _sessions.TryAdd(session.SessionId, session);
         
-        _logger.LogInformation("Created processing session {SessionId} for file {FileName} with {TaskCount} tasks",
+        _logger.LogInformation("已为文件 {FileName} 创建处理会话 {SessionId}，包含 {TaskCount} 个任务",
             session.SessionId, session.FileName, session.Tasks.Count);
         
         return session.SessionId;
@@ -93,13 +93,13 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
     {
         if (!_sessions.TryGetValue(sessionId, out var session))
         {
-            _logger.LogWarning("Session {SessionId} not found", sessionId);
+            _logger.LogWarning("未找到会话 {SessionId}", sessionId);
             return false;
         }
 
         if (session.Status != SessionStatus.Created && session.Status != SessionStatus.Uploaded)
         {
-            _logger.LogWarning("Session {SessionId} is not in a valid state for processing. Current status: {Status}",
+            _logger.LogWarning("会话 {SessionId} 状态无效，无法开始处理。当前状态：{Status}",
                 sessionId, session.Status);
             return false;
         }
@@ -114,7 +114,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             session.StartedAt = DateTime.UtcNow;
             session.Metrics = new PerformanceMetrics();
 
-            _logger.LogInformation("Starting processing for session {SessionId} with {TaskCount} tasks",
+            _logger.LogInformation("开始处理会话 {SessionId}，包含 {TaskCount} 个任务",
                 sessionId, session.Tasks.Count);
 
             // 并发启动处理任务
@@ -134,7 +134,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error during processing completion for session {SessionId}", sessionId);
+                    _logger.LogError(ex, "会话 {SessionId} 处理完成时发生错误", sessionId);
                     session.Status = SessionStatus.Failed;
                     session.ErrorMessage = ex.Message;
                 }
@@ -149,7 +149,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting processing for session {SessionId}: {Error}", sessionId, ex.Message);
+            _logger.LogError(ex, "启动会话 {SessionId} 处理时发生错误：{Error}", sessionId, ex.Message);
             session.Status = SessionStatus.Failed;
             session.ErrorMessage = ex.Message;
             return false;
@@ -178,7 +178,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             task.Status = TaskStatus.Cancelled;
         }
 
-        _logger.LogInformation("Cancelled processing for session {SessionId}", sessionId);
+        _logger.LogInformation("已取消会话 {SessionId} 的处理", sessionId);
         return await Task.FromResult(true);
     }
 
@@ -219,14 +219,14 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to delete temporary file {FilePath} for session {SessionId}",
+                _logger.LogWarning(ex, "删除会话 {SessionId} 的临时文件 {FilePath} 失败",
                     session.FilePath, session.SessionId);
             }
         }
 
         if (sessionsToRemove.Count > 0)
         {
-            _logger.LogInformation("Cleaned up {Count} completed sessions", sessionsToRemove.Count);
+            _logger.LogInformation("已清理 {Count} 个已完成的会话", sessionsToRemove.Count);
         }
 
         return await Task.FromResult(true);
@@ -244,7 +244,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             _ => 10 // 默认估算
         };
 
-        _logger.LogDebug("Estimated {QuestionCount} questions for file {FileName} ({FileSize} bytes)",
+        _logger.LogDebug("估算文件 {FileName} 包含 {QuestionCount} 个题目（{FileSize} 字节）",
             estimatedQuestions, Path.GetFileName(filePath), fileInfo.Length);
 
         return await Task.FromResult(Math.Min(estimatedQuestions, 100)); // 为安全起见，最多100个问题
@@ -273,7 +273,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             });
         }
 
-        _logger.LogDebug("Created {TaskCount} processing tasks for {QuestionCount} questions with {ThreadCount} threads",
+        _logger.LogDebug("为 {QuestionCount} 个题目创建了 {TaskCount} 个处理任务，使用 {ThreadCount} 个线程",
             tasks.Count, totalQuestions, maxThreads);
 
         return tasks;
@@ -303,7 +303,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             Math.Min(memoryBasedThreads, config.MaxConcurrentThreads)
         );
 
-        _logger.LogDebug("Calculated optimal thread count: {OptimalThreads} (CPU: {CpuThreads}, Memory: {MemoryThreads}, Tasks: {TaskCount})",
+        _logger.LogDebug("计算出最优线程数：{OptimalThreads}（CPU：{CpuThreads}，内存：{MemoryThreads}，任务：{TaskCount}）",
             optimalThreads, cpuBasedThreads, memoryBasedThreads, taskCount);
 
         return optimalThreads;
@@ -318,7 +318,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             task.Status = TaskStatus.InProgress;
             task.StartedAt = DateTime.UtcNow;
 
-            _logger.LogDebug("Starting processing task {TaskId} for questions {StartQuestion}-{EndQuestion} on thread {ThreadId}",
+            _logger.LogDebug("在线程 {ThreadId} 上开始处理任务 {TaskId}，题目范围：{StartQuestion}-{EndQuestion}",
                 task.TaskId, task.StartQuestionNumber, task.EndQuestionNumber, task.ThreadId);
 
             // 获取问题解析服务
@@ -339,19 +339,19 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             // 更新会话进度
             UpdateSessionProgress(session);
 
-            _logger.LogDebug("Completed processing task {TaskId} with {QuestionCount} questions",
+            _logger.LogDebug("已完成处理任务 {TaskId}，包含 {QuestionCount} 个题目",
                 task.TaskId, questions.Count);
         }
         catch (OperationCanceledException)
         {
             task.Status = TaskStatus.Cancelled;
-            _logger.LogInformation("Task {TaskId} was cancelled", task.TaskId);
+            _logger.LogInformation("任务 {TaskId} 已被取消", task.TaskId);
         }
         catch (Exception ex)
         {
             task.Status = TaskStatus.Failed;
             task.ErrorMessage = ex.Message;
-            _logger.LogError(ex, "Error processing task {TaskId}: {Error}", task.TaskId, ex.Message);
+            _logger.LogError(ex, "处理任务 {TaskId} 时发生错误：{Error}", task.TaskId, ex.Message);
         }
         finally
         {
@@ -408,7 +408,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         session.TotalQuestions = session.AllQuestions.Count;
         session.CompletedQuestions = session.AllQuestions.Count;
 
-        _logger.LogInformation("Completed processing session {SessionId} with {QuestionCount} questions in {Duration}",
+        _logger.LogInformation("已完成处理会话 {SessionId}，包含 {QuestionCount} 个题目，耗时 {Duration}",
             session.SessionId, session.AllQuestions.Count, session.Metrics.ProcessingDuration);
 
         // 通知完成

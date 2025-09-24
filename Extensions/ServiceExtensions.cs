@@ -18,7 +18,7 @@ public static class SemanticKernelExtensions
     {
         // 配置 AI 提供商设置
         var aiProviderSettings = configuration.GetSection("AIProvider").Get<AIProviderSettings>()
-            ?? throw new InvalidOperationException("AIProvider configuration is missing");
+            ?? throw new InvalidOperationException("缺少AIProvider配置");
 
         services.AddSingleton(aiProviderSettings);
 
@@ -33,7 +33,7 @@ public static class SemanticKernelExtensions
                 // 配置 OpenAI
                 if (string.IsNullOrEmpty(aiProviderSettings.OpenAI.ApiKey))
                 {
-                    throw new InvalidOperationException("OpenAI API Key is required when using OpenAI provider");
+                    throw new InvalidOperationException("使用OpenAI提供商时需要OpenAI API密钥");
                 }
 
                 builder.AddOpenAIChatCompletion(
@@ -45,7 +45,7 @@ public static class SemanticKernelExtensions
             {
                 if (string.IsNullOrEmpty(aiProviderSettings.Doubao.ApiKey))
                 {
-                    throw new InvalidOperationException("Doubao API Key is required when using Doubao provider");
+                    throw new InvalidOperationException("使用豆包提供商时需要豆包API密钥");
                 }
 
                 var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>()
@@ -118,7 +118,6 @@ public static class ApplicationServiceExtensions
             {
                 client.BaseAddress = new Uri(aiProviderSettings.Ollama.BaseUrl);
                 client.Timeout = TimeSpan.FromMinutes(aiProviderSettings.Ollama.RequestTimeout);
-                // Ollama 不需要授权头
             }
         });
 

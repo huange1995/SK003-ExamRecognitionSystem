@@ -49,7 +49,7 @@ public class FileProcessingService : IFileProcessingService
     {
         try
         {
-            _logger.LogInformation("Converting file {FilePath} of type {FileType} to text", filePath, fileType);
+            _logger.LogInformation("正在将文件 {FilePath}（类型：{FileType}）转换为文本", filePath, fileType);
 
             var text = fileType switch
             {
@@ -59,14 +59,14 @@ public class FileProcessingService : IFileProcessingService
                 _ => throw new NotSupportedException($"File type {fileType} is not supported")
             };
 
-            _logger.LogInformation("Successfully extracted {TextLength} characters from {FileName}", 
+            _logger.LogInformation("成功从文件 {FileName} 提取了 {TextLength} 个字符", 
                 text.Length, Path.GetFileName(filePath));
 
             return text;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error converting file {FilePath} to text: {Error}", filePath, ex.Message);
+            _logger.LogError(ex, "将文件 {FilePath} 转换为文本时发生错误：{Error}", filePath, ex.Message);
             throw;
         }
     }
@@ -78,14 +78,14 @@ public class FileProcessingService : IFileProcessingService
             var imageBytes = await File.ReadAllBytesAsync(imagePath, cancellationToken);
             var base64String = Convert.ToBase64String(imageBytes);
             
-            _logger.LogDebug("Converted image {ImagePath} to base64 string ({Size} bytes)", 
+            _logger.LogDebug("已将图像 {ImagePath} 转换为base64字符串（{Size} 字节）", 
                 imagePath, imageBytes.Length);
             
             return base64String;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error converting image {ImagePath} to base64: {Error}", imagePath, ex.Message);
+            _logger.LogError(ex, "将图像 {ImagePath} 转换为base64时发生错误：{Error}", imagePath, ex.Message);
             throw;
         }
     }
@@ -96,14 +96,14 @@ public class FileProcessingService : IFileProcessingService
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning("File {FilePath} does not exist", filePath);
+                _logger.LogWarning("文件 {FilePath} 不存在", filePath);
                 return false;
             }
 
             var fileInfo = new FileInfo(filePath);
             if (fileInfo.Length == 0)
             {
-                _logger.LogWarning("File {FilePath} is empty", filePath);
+                _logger.LogWarning("文件 {FilePath} 为空", filePath);
                 return false;
             }
 
@@ -116,12 +116,12 @@ public class FileProcessingService : IFileProcessingService
                 _ => false
             };
 
-            _logger.LogDebug("File validation for {FilePath}: {IsValid}", filePath, isValid);
+            _logger.LogDebug("文件 {FilePath} 验证结果：{IsValid}", filePath, isValid);
             return isValid;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating file {FilePath}: {Error}", filePath, ex.Message);
+            _logger.LogError(ex, "验证文件 {FilePath} 时发生错误：{Error}", filePath, ex.Message);
             return false;
         }
     }
@@ -143,16 +143,16 @@ public class FileProcessingService : IFileProcessingService
                     extractedImages = await ExtractImagesFromDocxAsync(filePath, outputDirectory);
                     break;
                 default:
-                    _logger.LogWarning("Image extraction not supported for file type {FileType}", fileType);
+                    _logger.LogWarning("不支持从文件类型 {FileType} 中提取图像", fileType);
                     break;
             }
 
-            _logger.LogInformation("Extracted {ImageCount} images from {FileName}", 
+            _logger.LogInformation("从文件 {FileName} 提取了 {ImageCount} 张图像", 
                 extractedImages.Count, Path.GetFileName(filePath));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting images from {FilePath}: {Error}", filePath, ex.Message);
+            _logger.LogError(ex, "从文件 {FilePath} 提取图像时发生错误：{Error}", filePath, ex.Message);
         }
 
         return extractedImages;
@@ -198,8 +198,8 @@ public class FileProcessingService : IFileProcessingService
 
     private async Task<string> ExtractTextFromImageAsync(string imagePath, CancellationToken cancellationToken)
     {
-        // For image text extraction, we return a placeholder because OCR requires additional libraries
-        // In actual implementation, you need to integrate libraries like Tesseract.NET
+        // 对于图像文本提取，我们返回占位符，因为OCR需要额外的库
+        // 在实际实现中，您需要集成Tesseract.NET等库
         var imageInfo = await GetImageInfoAsync(imagePath, cancellationToken);
         return $"[IMAGE: {imageInfo.Width}x{imageInfo.Height}, Format: {imageInfo.Format}]";
     }
@@ -254,9 +254,9 @@ public class FileProcessingService : IFileProcessingService
     {
         var extractedImages = new List<string>();
         
-        // PDF image extraction is complex and requires additional libraries
+        // PDF图像提取很复杂，需要额外的库
         // 这是一个占位符实现
-        _logger.LogInformation("PDF image extraction not implemented yet");
+        _logger.LogInformation("PDF图像提取功能尚未实现");
         
         return await Task.FromResult(extractedImages);
     }
@@ -289,7 +289,7 @@ public class FileProcessingService : IFileProcessingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting images from DOCX: {Error}", ex.Message);
+            _logger.LogError(ex, "从DOCX文件提取图像时发生错误：{Error}", ex.Message);
         }
 
         return extractedImages;
@@ -331,7 +331,7 @@ public class QuestionParsingService : IQuestionParsingService
     {
         try
         {
-            _logger.LogInformation("Parsing questions from file {FilePath} for question numbers: {QuestionNumbers}",
+            _logger.LogInformation("正在从文件 {FilePath} 解析题目，题目编号：{QuestionNumbers}",
                 filePath, string.Join(", ", questionNumbers));
 
             var fileType = filePath.GetFileTypeFromExtension();
@@ -349,14 +349,14 @@ public class QuestionParsingService : IQuestionParsingService
                 _ => throw new NotSupportedException($"File type {fileType} is not supported")
             };
 
-            _logger.LogInformation("Successfully parsed {QuestionCount} questions from {FileName}",
+            _logger.LogInformation("成功从文件 {FileName} 解析出 {QuestionCount} 个题目",
                 questions.Count, Path.GetFileName(filePath));
 
             return questions;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error parsing questions from file {FilePath}: {Error}", filePath, ex.Message);
+            _logger.LogError(ex, "从文件 {FilePath} 解析题目时发生错误：{Error}", filePath, ex.Message);
             throw;
         }
     }
@@ -365,14 +365,14 @@ public class QuestionParsingService : IQuestionParsingService
     {
         try
         {
-            _logger.LogInformation("Parsing questions from text content for question numbers: {QuestionNumbers}",
+            _logger.LogInformation("正在从文本内容解析题目，题目编号：{QuestionNumbers}",
                 string.Join(", ", questionNumbers));
 
             return await _semanticKernelService.ExtractQuestionsFromTextAsync(text, questionNumbers, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error parsing questions from text: {Error}", ex.Message);
+            _logger.LogError(ex, "从文本解析题目时发生错误：{Error}", ex.Message);
             throw;
         }
     }
@@ -381,10 +381,10 @@ public class QuestionParsingService : IQuestionParsingService
     {
         try
         {
-            _logger.LogInformation("Parsing questions from image {ImagePath} for question numbers: {QuestionNumbers}",
+            _logger.LogInformation("正在从图像 {ImagePath} 解析题目，题目编号：{QuestionNumbers}",
                 imagePath, string.Join(", ", questionNumbers));
 
-            // Convert image to base64
+            // 将图像转换为base64
             var imageBase64 = await _fileProcessingService.ConvertImageToBase64Async(imagePath, cancellationToken);
 
             // 创建视觉分析请求
@@ -397,7 +397,7 @@ public class QuestionParsingService : IQuestionParsingService
                 Temperature = 0.3
             };
 
-            // Analyze using Semantic Kernel
+            // 使用Semantic Kernel进行分析
             var response = await _semanticKernelService.AnalyzeImageAsync(request, cancellationToken);
             
             if (!response.Success)
@@ -409,7 +409,7 @@ public class QuestionParsingService : IQuestionParsingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error parsing questions from image {ImagePath}: {Error}", imagePath, ex.Message);
+            _logger.LogError(ex, "从图像 {ImagePath} 解析题目时发生错误：{Error}", imagePath, ex.Message);
             throw;
         }
     }
@@ -418,7 +418,7 @@ public class QuestionParsingService : IQuestionParsingService
     {
         try
         {
-            _logger.LogInformation("Merging {SetCount} question sets", questionSets.Count);
+            _logger.LogInformation("正在合并 {SetCount} 个题目集合", questionSets.Count);
 
             if (questionSets.Count == 0)
                 return new List<ExamQuestion>();
@@ -448,13 +448,13 @@ public class QuestionParsingService : IQuestionParsingService
 
             var result = mergedQuestions.Values.OrderBy(q => q.QuestionNumber).ToList();
             
-            _logger.LogInformation("Merged question sets into {QuestionCount} unique questions", result.Count);
+            _logger.LogInformation("已将题目集合合并为 {QuestionCount} 个唯一题目", result.Count);
             
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error merging question sets: {Error}", ex.Message);
+            _logger.LogError(ex, "合并题目集合时发生错误：{Error}", ex.Message);
             throw;
         }
     }
@@ -466,7 +466,7 @@ public class QuestionParsingService : IQuestionParsingService
         
         if (string.IsNullOrWhiteSpace(text))
         {
-            _logger.LogWarning("No text extracted from document {FilePath}", filePath);
+            _logger.LogWarning("未从文档 {FilePath} 中提取到文本", filePath);
             return new List<ExamQuestion>();
         }
 

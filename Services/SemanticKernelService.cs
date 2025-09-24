@@ -46,7 +46,7 @@ public class SemanticKernelService : ISemanticKernelService
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
-            _logger.LogInformation("Starting vision analysis for image with {QuestionCount} questions", request.QuestionNumbers.Count);
+            _logger.LogInformation("开始对图像进行视觉分析，包含 {QuestionCount} 个题目", request.QuestionNumbers.Count);
 
             // 获取或创建对话历史
             var conversation = request.History ?? await CreateConversationAsync("Exam paper question extraction");
@@ -79,7 +79,7 @@ public class SemanticKernelService : ISemanticKernelService
             chatHistory.AddUserMessage(userMessage);
             if (!string.IsNullOrEmpty(request.ImageBase64))
             {
-                //userMessage += "\n[已提供图像数据用于分析]";
+                // userMessage += "\n[已提供图像数据用于分析]";
           
             }
             // 配置执行设置
@@ -123,7 +123,7 @@ public class SemanticKernelService : ISemanticKernelService
             // 解析提取的问题
             var extractedQuestions = await ParseExtractedQuestionsAsync(response.Content ?? "", questionNumbers);
 
-            _logger.LogInformation("Vision analysis completed successfully. Extracted {QuestionCount} questions in {Duration}ms", 
+            _logger.LogInformation("视觉分析成功完成，提取了 {QuestionCount} 个题目，耗时 {Duration}ms", 
                 extractedQuestions.Count, stopwatch.ElapsedMilliseconds);
 
             return new VisionAnalysisResponse
@@ -140,7 +140,7 @@ public class SemanticKernelService : ISemanticKernelService
         catch (Exception ex)
         {
             stopwatch.Stop();
-            _logger.LogError(ex, "Error during vision analysis: {Error}", ex.Message);
+            _logger.LogError(ex, "视觉分析过程中发生错误：{Error}", ex.Message);
             
             return new VisionAnalysisResponse
             {
@@ -162,7 +162,7 @@ public class SemanticKernelService : ISemanticKernelService
 
         _conversations.TryAdd(conversation.ConversationId, conversation);
         
-        _logger.LogInformation("Created new conversation {ConversationId} with context: {Context}", 
+        _logger.LogInformation("已创建新对话 {ConversationId}，上下文：{Context}", 
             conversation.ConversationId, context);
 
         return await Task.FromResult(conversation);
@@ -177,7 +177,7 @@ public class SemanticKernelService : ISemanticKernelService
     public async Task<bool> DeleteConversationAsync(string conversationId)
     {
         var removed = _conversations.TryRemove(conversationId, out _);
-        _logger.LogInformation("Conversation {ConversationId} deleted: {Success}", conversationId, removed);
+        _logger.LogInformation("对话 {ConversationId} 删除结果：{Success}", conversationId, removed);
         return await Task.FromResult(removed);
     }
 
@@ -185,7 +185,7 @@ public class SemanticKernelService : ISemanticKernelService
     {
         try
         {
-            _logger.LogInformation("Extracting questions from text for question numbers: {QuestionNumbers}", 
+            _logger.LogInformation("从文本中提取题目，题目编号：{QuestionNumbers}", 
                 string.Join(", ", questionNumbers));
 
             var prompt = $"""
@@ -211,7 +211,7 @@ public class SemanticKernelService : ISemanticKernelService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting questions from text: {Error}", ex.Message);
+            _logger.LogError(ex, "从文本提取题目时发生错误：{Error}", ex.Message);
             return new List<ExamQuestion>();
         }
     }
@@ -333,11 +333,11 @@ public class SemanticKernelService : ISemanticKernelService
                 }
             }
             
-            _logger.LogInformation("Successfully parsed {Count} questions from AI response", questions.Count);
+            _logger.LogInformation("成功从AI响应中解析出 {Count} 个题目", questions.Count);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error parsing extracted questions from response: {Error}", ex.Message);
+            _logger.LogError(ex, "解析响应中的题目时发生错误：{Error}", ex.Message);
             
             // 备用方案：尝试基于预期编号创建基本问题
             questions = expectedQuestionNumbers.Select(num => new ExamQuestion
