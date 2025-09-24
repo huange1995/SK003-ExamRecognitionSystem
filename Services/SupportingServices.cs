@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace ExamRecognitionSystem.Services;
 
 /// <summary>
-/// Interface for file upload operations
+/// 文件上传操作接口
 /// </summary>
 public interface IFileUploadService
 {
@@ -17,7 +17,7 @@ public interface IFileUploadService
 }
 
 /// <summary>
-/// Interface for progress monitoring
+/// 进度监控接口
 /// </summary>
 public interface IProgressMonitoringService
 {
@@ -29,7 +29,7 @@ public interface IProgressMonitoringService
 }
 
 /// <summary>
-/// Interface for performance monitoring
+/// 性能监控接口
 /// </summary>
 public interface IPerformanceMonitoringService
 {
@@ -40,7 +40,7 @@ public interface IPerformanceMonitoringService
 }
 
 /// <summary>
-/// Service for handling file uploads with validation
+/// 处理文件上传和验证的服务
 /// </summary>
 public class FileUploadService : IFileUploadService
 {
@@ -56,7 +56,7 @@ public class FileUploadService : IFileUploadService
         _settings = settings.Value;
         _uploadedFiles = new ConcurrentDictionary<string, FileUploadInfo>();
 
-        // Ensure temp directory exists
+        // 确保临时目录存在
         Directory.CreateDirectory(_settings.TempDirectory);
     }
 
@@ -74,18 +74,18 @@ public class FileUploadService : IFileUploadService
 
         try
         {
-            // Generate unique file path
+            // 生成唯一的文件路径
             var fileExtension = Path.GetExtension(file.FileName);
             var fileName = $"{sessionId}_{DateTime.UtcNow:yyyyMMdd_HHmmss}{fileExtension}";
             var filePath = Path.Combine(_settings.TempDirectory, fileName);
 
-            // Save file
+            // 保存文件
             using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream, cancellationToken);
             }
 
-            // Store file info
+            // 存储文件信息
             var fileInfo = new FileUploadInfo
             {
                 SessionId = sessionId,
@@ -179,7 +179,7 @@ public class FileUploadService : IFileUploadService
 }
 
 /// <summary>
-/// Service for monitoring processing progress
+/// 监控处理进度的服务
 /// </summary>
 public class ProgressMonitoringService : IProgressMonitoringService
 {
@@ -240,7 +240,7 @@ public class ProgressMonitoringService : IProgressMonitoringService
 }
 
 /// <summary>
-/// Service for monitoring system performance
+/// 监控系统性能的服务
 /// </summary>
 public class PerformanceMonitoringService : IPerformanceMonitoringService
 {
@@ -254,7 +254,7 @@ public class PerformanceMonitoringService : IPerformanceMonitoringService
         _logger = logger;
         _metricsHistory = new List<PerformanceMetrics>();
         
-        // Collect metrics every 30 seconds
+        // 每30秒收集一次指标
         _metricsTimer = new Timer(CollectMetrics, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
     }
 
@@ -276,8 +276,8 @@ public class PerformanceMonitoringService : IPerformanceMonitoringService
         lock (_metricsLock)
         {
             var historicalMetrics = _metricsHistory
-                .Where(m => m.ProcessingDuration >= TimeSpan.Zero) // Filter valid metrics
-                .TakeLast(100) // Keep last 100 entries
+                .Where(m => m.ProcessingDuration >= TimeSpan.Zero) // 过滤有效指标
+                .TakeLast(100) // 保留最后100条记录
                 .ToList();
             
             return historicalMetrics;
@@ -290,7 +290,7 @@ public class PerformanceMonitoringService : IPerformanceMonitoringService
         {
             _metricsHistory.Add(metrics);
             
-            // Keep only recent metrics (last 1000 entries)
+            // 只保留最近的指标（最后1000条记录）
             if (_metricsHistory.Count > 1000)
             {
                 _metricsHistory.RemoveAt(0);
@@ -307,10 +307,10 @@ public class PerformanceMonitoringService : IPerformanceMonitoringService
     {
         var currentMetrics = GetCurrentMetrics();
         
-        // Define health thresholds
+        // 定义健康阈值
         var cpuThreshold = 80.0; // 80% CPU
-        var memoryThreshold = 2L * 1024 * 1024 * 1024; // 2GB memory
-        var threadThreshold = 100; // 100 threads
+        var memoryThreshold = 2L * 1024 * 1024 * 1024; // 2GB 内存
+        var threadThreshold = 100; // 100 线程
 
         var isHealthy = currentMetrics.CpuUsagePercent < cpuThreshold &&
                        currentMetrics.MemoryUsageBytes < memoryThreshold &&
@@ -342,7 +342,7 @@ public class PerformanceMonitoringService : IPerformanceMonitoringService
 }
 
 /// <summary>
-/// Background service for cleaning up expired files and sessions
+/// 清理过期文件和会话的后台服务
 /// </summary>
 public class ProcessingCleanupService : BackgroundService
 {
@@ -367,15 +367,15 @@ public class ProcessingCleanupService : BackgroundService
             {
                 using var scope = _serviceProvider.CreateScope();
                 
-                // Cleanup expired files
+                // 清理过期文件
                 var fileUploadService = scope.ServiceProvider.GetRequiredService<IFileUploadService>();
                 await fileUploadService.CleanupExpiredFilesAsync();
 
-                // Cleanup completed sessions
+                // 清理已完成的会话
                 var threadPoolManager = scope.ServiceProvider.GetRequiredService<IThreadPoolManager>();
                 await threadPoolManager.CleanupCompletedSessionsAsync(TimeSpan.FromHours(24));
 
-                // Wait for 1 hour before next cleanup
+                // 等待1小时后进行下次清理
                 await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
             catch (OperationCanceledException)
@@ -386,7 +386,7 @@ public class ProcessingCleanupService : BackgroundService
             {
                 _logger.LogError(ex, "Error during cleanup operation: {Error}", ex.Message);
                 
-                // Wait for 10 minutes before retrying
+                // 等待10分钟后重试
                 await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
             }
         }

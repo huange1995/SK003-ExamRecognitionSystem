@@ -6,7 +6,7 @@ using ExamRecognitionSystem.Services;
 namespace ExamRecognitionSystem.Controllers;
 
 /// <summary>
-/// Controller for monitoring processing progress and system status
+/// 用于监控处理进度和系统状态的控制器
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -30,10 +30,10 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Get processing status for a specific session
+    /// 获取指定会话的处理状态
     /// </summary>
-    /// <param name="sessionId">Session ID to check</param>
-    /// <returns>Processing status information</returns>
+    /// <param name="sessionId">要检查的会话ID</param>
+    /// <returns>处理状态信息</returns>
     [HttpGet("status/{sessionId}")]
     public async Task<ActionResult<ApiResponse<ProcessingStatusResponse>>> GetProcessingStatus(string sessionId)
     {
@@ -86,9 +86,9 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Get all active processing sessions
+    /// 获取所有活跃的处理会话
     /// </summary>
-    /// <returns>List of active sessions</returns>
+    /// <returns>活跃会话列表</returns>
     [HttpGet("active-sessions")]
     public async Task<ActionResult<ApiResponse<List<ProcessingStatusResponse>>>> GetActiveSessions()
     {
@@ -123,10 +123,10 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Get extracted questions for a completed session
+    /// 获取已完成会话的提取题目
     /// </summary>
-    /// <param name="sessionId">Session ID to get questions for</param>
-    /// <returns>Extracted questions</returns>
+    /// <param name="sessionId">要获取题目的会话ID</param>
+    /// <returns>提取的题目</returns>
     [HttpGet("questions/{sessionId}")]
     public async Task<ActionResult<ApiResponse<QuestionsResponse>>> GetExtractedQuestions(string sessionId)
     {
@@ -180,9 +180,9 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Get current system performance metrics
+    /// 获取当前系统性能指标
     /// </summary>
-    /// <returns>Current performance metrics</returns>
+    /// <returns>当前性能指标</returns>
     [HttpGet("performance/current")]
     public ActionResult<ApiResponse<PerformanceMetricsDto>> GetCurrentPerformance()
     {
@@ -209,17 +209,17 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Get historical performance metrics
+    /// 获取历史性能指标
     /// </summary>
-    /// <param name="hours">Number of hours of history to retrieve (default: 1)</param>
-    /// <returns>Historical performance metrics</returns>
+    /// <param name="hours">要检索的历史小时数（默认：1）</param>
+    /// <returns>历史性能指标</returns>
     [HttpGet("performance/history")]
     public async Task<ActionResult<ApiResponse<List<PerformanceMetricsDto>>>> GetPerformanceHistory(
         [FromQuery] int hours = 1)
     {
         try
         {
-            var period = TimeSpan.FromHours(Math.Max(1, Math.Min(24, hours))); // Limit to 1-24 hours
+            var period = TimeSpan.FromHours(Math.Max(1, Math.Min(24, hours))); // 限制为1-24小时
             var historicalMetrics = await _performanceMonitoringService.GetHistoricalMetricsAsync(period);
             
             var metricsDto = historicalMetrics.Select(m => new PerformanceMetricsDto
@@ -242,9 +242,9 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Get system health status
+    /// 获取系统健康状态
     /// </summary>
-    /// <returns>System health information</returns>
+    /// <returns>系统健康信息</returns>
     [HttpGet("health")]
     public async Task<ActionResult<ApiResponse<SystemHealthDto>>> GetSystemHealth()
     {
@@ -281,10 +281,10 @@ public class MonitoringController : ControllerBase
     }
 
     /// <summary>
-    /// Export questions to JSON format
+    /// 将题目导出为JSON格式
     /// </summary>
-    /// <param name="sessionId">Session ID to export</param>
-    /// <returns>JSON file with questions</returns>
+    /// <param name="sessionId">要导出的会话ID</param>
+    /// <returns>包含题目的JSON文件</returns>
     [HttpGet("export/{sessionId}")]
     public async Task<ActionResult> ExportQuestions(string sessionId)
     {
@@ -298,7 +298,7 @@ public class MonitoringController : ControllerBase
 
             if (session.Status != SessionStatus.Completed)
             {
-                return BadRequest("Session is not completed");
+                return BadRequest("会话未完成");
             }
 
             var exportData = new
@@ -331,7 +331,7 @@ public class MonitoringController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error exporting questions for session {SessionId}: {Error}", sessionId, ex.Message);
-            return StatusCode(500, "Internal server error during export");
+            return StatusCode(500, "导出过程中发生内部服务器错误");
         }
     }
 
@@ -340,17 +340,17 @@ public class MonitoringController : ControllerBase
         var issues = new List<string>();
 
         if (metrics.CpuUsagePercent > 80)
-            issues.Add($"High CPU usage: {metrics.CpuUsagePercent:F1}%");
+            issues.Add($"CPU使用率过高: {metrics.CpuUsagePercent:F1}%");
 
-        if (metrics.MemoryUsageBytes > 2L * 1024 * 1024 * 1024) // 2GB
-            issues.Add($"High memory usage: {metrics.MemoryUsageBytes / (1024 * 1024):F0}MB");
+        if (metrics.MemoryUsageBytes > 2L * 1024 * 1024 * 1024) // 2GB 内存限制
+            issues.Add($"内存使用量过高: {metrics.MemoryUsageBytes / (1024 * 1024):F0}MB");
 
         if (metrics.ActiveThreads > 100)
-            issues.Add($"High thread count: {metrics.ActiveThreads}");
+            issues.Add($"线程数量过多: {metrics.ActiveThreads}");
 
         var failedSessions = activeSessions.Count(s => s.Status == SessionStatus.Failed);
         if (failedSessions > 0)
-            issues.Add($"Failed sessions detected: {failedSessions}");
+            issues.Add($"检测到失败的会话: {failedSessions}");
 
         return issues;
     }

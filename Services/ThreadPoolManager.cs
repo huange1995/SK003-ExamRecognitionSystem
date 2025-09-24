@@ -7,7 +7,7 @@ using TaskStatus = ExamRecognitionSystem.Models.TaskStatus;
 namespace ExamRecognitionSystem.Services;
 
 /// <summary>
-/// Interface for thread pool management
+/// 线程池管理接口
 /// </summary>
 public interface IThreadPoolManager
 {
@@ -22,7 +22,7 @@ public interface IThreadPoolManager
 }
 
 /// <summary>
-/// High-performance multi-threading manager with dynamic thread allocation
+/// 具有动态线程分配的高性能多线程管理器
 /// </summary>
 public class ThreadPoolManager : IThreadPoolManager, IDisposable
 {
@@ -48,11 +48,11 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         _sessions = new ConcurrentDictionary<string, ProcessingSession>();
         _cancellationTokens = new ConcurrentDictionary<string, CancellationTokenSource>();
         
-        // Configure default thread pool settings
+        // 配置默认线程池设置
         _defaultConfig = configuration.GetSection("Threading").Get<ThreadPoolConfig>() ?? new ThreadPoolConfig();
         _processingLimitSemaphore = new SemaphoreSlim(_defaultConfig.MaxConcurrentThreads, _defaultConfig.MaxConcurrentThreads);
         
-        // Setup cleanup timer to run every 5 minutes
+        // 设置清理定时器每5分钟运行一次
         _cleanupTimer = new Timer(async _ => await CleanupCompletedSessionsAsync(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
         
         _logger.LogInformation("ThreadPoolManager initialized with max {MaxThreads} concurrent threads, {QuestionsPerThread} questions per thread",
@@ -72,13 +72,13 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             CreatedAt = DateTime.UtcNow
         };
 
-        // Use provided config or default
+        // 使用提供的配置或默认配置
         var threadConfig = config ?? _defaultConfig;
 
-        // Estimate total questions (this would be refined after initial analysis)
+        // 估算总题目数（这将在初始分析后进行优化）
         session.TotalQuestions = 2;// await EstimateQuestionCountAsync(filePath, fileType);
         
-        // Create processing tasks based on thread configuration
+        // 根据线程配置创建处理任务
         session.Tasks = CreateProcessingTasks(session.TotalQuestions, threadConfig);
         
         _sessions.TryAdd(session.SessionId, session);
@@ -106,7 +106,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
 
         try
         {
-            // Create cancellation token source for this session
+            // 为此会话创建取消令牌源
             var sessionCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _cancellationTokens.TryAdd(sessionId, sessionCts);
 
@@ -117,14 +117,14 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             _logger.LogInformation("Starting processing for session {SessionId} with {TaskCount} tasks",
                 sessionId, session.Tasks.Count);
 
-            // Start processing tasks concurrently
+            // 并发启动处理任务
             var processingTasks = session.Tasks.Select(task => 
                 ProcessTaskAsync(session, task, sessionCts.Token)).ToArray();
 
-            // Start monitoring task
+            // 启动监控任务
             _ = Task.Run(async () => await MonitorProcessingAsync(session, sessionCts.Token), sessionCts.Token);
 
-            // Wait for all tasks to complete
+            // 等待所有任务完成
             _ = Task.Run(async () =>
             {
                 try
@@ -172,7 +172,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         session.Status = SessionStatus.Cancelled;
         session.CompletedAt = DateTime.UtcNow;
 
-        // Cancel all pending tasks
+        // 取消所有待处理任务
         foreach (var task in session.Tasks.Where(t => t.Status == TaskStatus.Pending || t.Status == TaskStatus.InProgress))
         {
             task.Status = TaskStatus.Cancelled;
@@ -209,7 +209,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         {
             _sessions.TryRemove(session.SessionId, out _);
             
-            // Clean up temporary files
+            // 清理临时文件
             try
             {
                 if (File.Exists(session.FilePath))
@@ -234,20 +234,20 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
 
     private async Task<int> EstimateQuestionCountAsync(string filePath, FileType fileType)
     {
-        // Simple estimation logic - in a real implementation, this could be more sophisticated
+        // 简单的估算逻辑 - 在实际实现中，这可以更加复杂
         var fileInfo = new FileInfo(filePath);
         var estimatedQuestions = fileType switch
         {
-            FileType.Pdf => Math.Max(1, (int)(fileInfo.Length / (50 * 1024))), // Estimate 1 question per 50KB
-            FileType.Docx => Math.Max(1, (int)(fileInfo.Length / (30 * 1024))), // Estimate 1 question per 30KB
-            FileType.Jpeg or FileType.Png => Math.Max(1, (int)(fileInfo.Length / (100 * 1024))), // Estimate 1 question per 100KB
-            _ => 10 // Default estimate
+            FileType.Pdf => Math.Max(1, (int)(fileInfo.Length / (50 * 1024))), // 估算每50KB一个问题
+            FileType.Docx => Math.Max(1, (int)(fileInfo.Length / (30 * 1024))), // 估算每30KB一个问题
+            FileType.Jpeg or FileType.Png => Math.Max(1, (int)(fileInfo.Length / (100 * 1024))), // 估算每100KB一个问题
+            _ => 10 // 默认估算
         };
 
         _logger.LogDebug("Estimated {QuestionCount} questions for file {FileName} ({FileSize} bytes)",
             estimatedQuestions, Path.GetFileName(filePath), fileInfo.Length);
 
-        return await Task.FromResult(Math.Min(estimatedQuestions, 100)); // Cap at 100 questions for safety
+        return await Task.FromResult(Math.Min(estimatedQuestions, 100)); // 为安全起见，最多100个问题
     }
 
     private List<ProcessingTask> CreateProcessingTasks(int totalQuestions, ThreadPoolConfig config)
@@ -286,16 +286,16 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             return config.MaxConcurrentThreads;
         }
 
-        // Adaptive threading based on workload and system resources
+        // 基于工作负载和系统资源的自适应线程
         var cpuCount = Environment.ProcessorCount;
         var memoryUsageMB = PerformanceExtensions.GetMemoryUsage() / (1024 * 1024);
         
-        // Calculate optimal thread count based on:
-        // 1. Number of questions
-        // 2. Available CPU cores
-        // 3. Current memory usage
+        // 基于以下因素计算最优线程数：
+        // 1. 问题数量
+        // 2. 可用CPU核心数
+        // 3. 当前内存使用情况
         var taskCount = (int)Math.Ceiling((double)totalQuestions / config.QuestionsPerThread);
-        var cpuBasedThreads = Math.Max(1, cpuCount - 1); // Leave one core for system
+        var cpuBasedThreads = Math.Max(1, cpuCount - 1); // 为系统保留一个核心
         var memoryBasedThreads = memoryUsageMB < 512 ? cpuCount : Math.Max(1, cpuCount / 2);
         
         var optimalThreads = Math.Min(
@@ -321,11 +321,11 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             _logger.LogDebug("Starting processing task {TaskId} for questions {StartQuestion}-{EndQuestion} on thread {ThreadId}",
                 task.TaskId, task.StartQuestionNumber, task.EndQuestionNumber, task.ThreadId);
 
-            // Get question parsing service
+            // 获取问题解析服务
             using var scope = _serviceProvider.CreateScope();
             var questionParsingService = scope.ServiceProvider.GetRequiredService<IQuestionParsingService>();
 
-            // Process questions for this task
+            // 处理此任务的问题
             var questions = await questionParsingService.ParseQuestionsAsync(
                 session.FilePath, 
                 Enumerable.Range(task.StartQuestionNumber, task.EndQuestionNumber - task.StartQuestionNumber + 1).ToList(),
@@ -336,7 +336,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             task.CompletedAt = DateTime.UtcNow;
             task.Progress = 100;
 
-            // Update session progress
+            // 更新会话进度
             UpdateSessionProgress(session);
 
             _logger.LogDebug("Completed processing task {TaskId} with {QuestionCount} questions",
@@ -368,7 +368,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
             .Where(t => t.Status == TaskStatus.Completed)
             .Sum(t => t.Questions.Count);
 
-        // Update performance metrics
+        // 更新性能指标
         session.Metrics.ActiveThreads = session.Tasks.Count(t => t.Status == TaskStatus.InProgress);
         session.Metrics.CpuUsagePercent = PerformanceExtensions.GetCpuUsage();
         session.Metrics.MemoryUsageBytes = PerformanceExtensions.GetMemoryUsage();
@@ -381,7 +381,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
                 (int)(session.CompletedQuestions / secondsElapsed) : 0;
         }
 
-        // Notify progress update
+        // 通知进度更新
         ProgressUpdated?.Invoke(this, new ProcessingProgressEventArgs
         {
             SessionId = session.SessionId,
@@ -398,7 +398,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         session.Status = SessionStatus.Completed;
         session.CompletedAt = DateTime.UtcNow;
 
-        // Merge all questions from completed tasks
+        // 合并所有已完成任务的问题
         session.AllQuestions = session.Tasks
             .Where(t => t.Status == TaskStatus.Completed)
             .SelectMany(t => t.Questions)
@@ -411,7 +411,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
         _logger.LogInformation("Completed processing session {SessionId} with {QuestionCount} questions in {Duration}",
             session.SessionId, session.AllQuestions.Count, session.Metrics.ProcessingDuration);
 
-        // Notify completion
+        // 通知完成
         ProcessingCompleted?.Invoke(this, new ProcessingCompletedEventArgs
         {
             SessionId = session.SessionId,
@@ -459,7 +459,7 @@ public class ThreadPoolManager : IThreadPoolManager, IDisposable
 }
 
 /// <summary>
-/// Event arguments for processing progress updates
+/// 处理进度更新的事件参数
 /// </summary>
 public class ProcessingProgressEventArgs : EventArgs
 {
@@ -472,7 +472,7 @@ public class ProcessingProgressEventArgs : EventArgs
 }
 
 /// <summary>
-/// Event arguments for processing completion
+/// 处理完成的事件参数
 /// </summary>
 public class ProcessingCompletedEventArgs : EventArgs
 {

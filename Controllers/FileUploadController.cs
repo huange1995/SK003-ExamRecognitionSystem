@@ -7,7 +7,7 @@ using ExamRecognitionSystem.Extensions;
 namespace ExamRecognitionSystem.Controllers;
 
 /// <summary>
-/// Controller for file upload operations
+/// 文件上传操作控制器
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -28,13 +28,13 @@ public class FileUploadController : ControllerBase
     }
 
     /// <summary>
-    /// Upload exam paper file for processing
+    /// 上传试卷文件进行处理
     /// </summary>
-    /// <param name="file">The exam paper file (PDF, DOCX, JPEG, PNG)</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>File upload result with session ID</returns>
+    /// <param name="file">试卷文件 (PDF, DOCX, JPEG, PNG)</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>包含会话ID的文件上传结果</returns>
     [HttpPost("upload")]
-    [RequestSizeLimit(10 * 1024 * 1024)] // 10MB limit
+    [RequestSizeLimit(10 * 1024 * 1024)] // 10MB 限制
     [DisableRequestSizeLimit]
     public async Task<ActionResult<ApiResponse<FileUploadResponse>>> UploadFile(
         IFormFile file,
@@ -51,7 +51,7 @@ public class FileUploadController : ControllerBase
                     "No file provided", new List<string> { "File is required" }));
             }
 
-            // Upload file
+            // 上传文件
             var (success, sessionId, errors) = await _fileUploadService.UploadFileAsync(file, cancellationToken);
 
             if (!success)
@@ -60,7 +60,7 @@ public class FileUploadController : ControllerBase
                     "File upload failed", errors));
             }
 
-            // Get file path for session creation
+            // 获取文件路径用于创建会话
             var filePath = await _fileUploadService.GetFilePathAsync(sessionId);
             if (string.IsNullOrEmpty(filePath))
             {
@@ -68,7 +68,7 @@ public class FileUploadController : ControllerBase
                     "Failed to retrieve uploaded file"));
             }
 
-            // Create processing session
+            // 创建处理会话
             var fileType = file.FileName.GetFileTypeFromExtension();
             var processingSessionId = await _threadPoolManager.CreateProcessingSessionAsync(filePath, fileType);
 
@@ -94,11 +94,11 @@ public class FileUploadController : ControllerBase
     }
 
     /// <summary>
-    /// Start processing uploaded file
+    /// 开始处理上传的文件
     /// </summary>
-    /// <param name="request">Processing start request</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Processing start result</returns>
+    /// <param name="request">处理启动请求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>处理启动结果</returns>
     [HttpPost("start-processing")]
     public async Task<ActionResult<ApiResponse<ProcessingStatusResponse>>> StartProcessing(
         [FromBody] ProcessingStartRequest request,
@@ -134,10 +134,10 @@ public class FileUploadController : ControllerBase
     }
 
     /// <summary>
-    /// Cancel processing for a session
+    /// 取消会话的处理
     /// </summary>
-    /// <param name="sessionId">Session ID to cancel</param>
-    /// <returns>Cancellation result</returns>
+    /// <param name="sessionId">要取消的会话ID</param>
+    /// <returns>取消结果</returns>
     [HttpPost("cancel/{sessionId}")]
     public async Task<ActionResult<ApiResponse<bool>>> CancelProcessing(string sessionId)
     {
@@ -163,10 +163,10 @@ public class FileUploadController : ControllerBase
     }
 
     /// <summary>
-    /// Delete uploaded file and associated session
+    /// 删除上传的文件和关联的会话
     /// </summary>
-    /// <param name="sessionId">Session ID to delete</param>
-    /// <returns>Deletion result</returns>
+    /// <param name="sessionId">要删除的会话ID</param>
+    /// <returns>删除结果</returns>
     [HttpDelete("{sessionId}")]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteFile(string sessionId)
     {
@@ -174,10 +174,10 @@ public class FileUploadController : ControllerBase
         {
             _logger.LogInformation("Deleting file for session {SessionId}", sessionId);
 
-            // Cancel processing if still running
+            // 如果仍在运行则取消处理
             await _threadPoolManager.CancelProcessingAsync(sessionId);
 
-            // Delete uploaded file
+            // 删除上传的文件
             var deleted = await _fileUploadService.DeleteFileAsync(sessionId);
 
             return Ok(ApiResponse<bool>.SuccessResult(deleted, 

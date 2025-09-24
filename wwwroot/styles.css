@@ -1,4 +1,4 @@
-/* Global Styles */
+/* 全局样式 */
 * {
     margin: 0;
     padding: 0;
@@ -18,7 +18,7 @@ body {
     padding: 20px;
 }
 
-/* Header Styles */
+/* 头部样式 */
 .header {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -77,7 +77,7 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
 }
 
-/* Card Styles */
+/* 卡片样式 */
 .card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -107,7 +107,7 @@ body {
     padding: 30px;
 }
 
-/* Upload Area */
+/* 上传区域 */
 .upload-area {
     border: 3px dashed #cbd5e0;
     border-radius: 15px;
@@ -145,7 +145,7 @@ body {
     color: #718096 !important;
 }
 
-/* File Preview */
+/* 文件预览 */
 .file-preview {
     background: #f7fafc;
     border-radius: 10px;
@@ -179,7 +179,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Processing Config */
+/* 处理配置 */
 .processing-config {
     background: #f7fafc;
     border-radius: 10px;
@@ -212,7 +212,7 @@ body {
     font-size: 1rem;
 }
 
-/* Buttons */
+/* 按钮 */
 .btn {
     padding: 12px 24px;
     border: none;
@@ -272,7 +272,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Progress Section */
+/* 进度部分 */
 .progress-overview {
     margin-bottom: 30px;
 }
@@ -336,7 +336,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Thread Status */
+/* 线程状态 */
 .thread-status {
     margin-bottom: 30px;
 }
@@ -400,7 +400,7 @@ body {
     color: #c53030;
 }
 
-/* Performance Metrics */
+/* 性能指标 */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -426,7 +426,7 @@ body {
     font-weight: bold;
 }
 
-/* Results Section */
+/* 结果部分 */
 .results-summary {
     margin-bottom: 30px;
 }
@@ -457,7 +457,7 @@ body {
     font-size: 1.2rem;
 }
 
-/* Questions Filter */
+/* 题目过滤 */
 .questions-filter {
     margin-bottom: 30px;
 }
@@ -482,7 +482,7 @@ body {
     min-width: 200px;
 }
 
-/* Questions List */
+/* 题目列表 */
 .questions-list {
     display: grid;
     gap: 20px;
@@ -551,7 +551,7 @@ body {
     font-weight: 500;
 }
 
-/* Upload Actions */
+/* 上传操作 */
 .upload-actions {
     display: flex;
     gap: 15px;
@@ -565,7 +565,7 @@ body {
     gap: 10px;
 }
 
-/* Loading Overlay */
+/* 加载遮罩 */
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -602,7 +602,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Toast Notifications */
+/* 提示通知 */
 .toast-container {
     position: fixed;
     top: 20px;
@@ -675,7 +675,7 @@ body {
     padding: 0;
 }
 
-/* Responsive Design */
+/* 响应式设计 */
 @media (max-width: 768px) {
     .container {
         padding: 10px;

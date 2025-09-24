@@ -5,7 +5,7 @@ using ExamRecognitionSystem.DTOs;
 namespace ExamRecognitionSystem.Middleware;
 
 /// <summary>
-/// Middleware for global exception handling
+/// 全局异常处理中间件
 /// </summary>
 public class ExceptionHandlingMiddleware
 {
@@ -26,7 +26,7 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred while processing request {Path}", context.Request.Path);
+            _logger.LogError(ex, "处理请求 {Path} 时发生未处理的异常", context.Request.Path);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -40,50 +40,50 @@ public class ExceptionHandlingMiddleware
             ArgumentException or ArgumentNullException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Invalid request parameters",
+                Message = "无效的请求参数",
                 Errors = new List<string> { exception.Message }
             },
             FileNotFoundException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Requested file not found",
+                Message = "请求的文件未找到",
                 Errors = new List<string> { exception.Message }
             },
             UnauthorizedAccessException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Access denied",
-                Errors = new List<string> { "You don't have permission to access this resource" }
+                Message = "访问被拒绝",
+                Errors = new List<string> { "您没有权限访问此资源" }
             },
             TimeoutException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Operation timed out",
-                Errors = new List<string> { "The operation took too long to complete" }
+                Message = "操作超时",
+                Errors = new List<string> { "操作完成时间过长" }
             },
             OperationCanceledException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Operation was cancelled",
-                Errors = new List<string> { "The operation was cancelled by user or system" }
+                Message = "操作已取消",
+                Errors = new List<string> { "操作被用户或系统取消" }
             },
             InvalidOperationException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Invalid operation",
+                Message = "无效操作",
                 Errors = new List<string> { exception.Message }
             },
             NotSupportedException => new ApiResponse<object>
             {
                 Success = false,
-                Message = "Operation not supported",
+                Message = "不支持的操作",
                 Errors = new List<string> { exception.Message }
             },
             _ => new ApiResponse<object>
             {
                 Success = false,
-                Message = "An internal server error occurred",
-                Errors = new List<string> { "Please try again later or contact support" }
+                Message = "发生内部服务器错误",
+                Errors = new List<string> { "请稍后重试或联系支持" }
             }
         };
 
@@ -110,7 +110,7 @@ public class ExceptionHandlingMiddleware
 }
 
 /// <summary>
-/// Middleware for request/response logging
+/// 请求/响应日志记录中间件
 /// </summary>
 public class RequestLoggingMiddleware
 {
@@ -128,8 +128,8 @@ public class RequestLoggingMiddleware
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var requestId = Guid.NewGuid().ToString("N")[..8];
         
-        // Log request
-        _logger.LogInformation("Request {RequestId} started: {Method} {Path} from {RemoteIpAddress}",
+        // 记录请求
+        _logger.LogInformation("请求 {RequestId} 开始：{Method} {Path} 来自 {RemoteIpAddress}",
             requestId,
             context.Request.Method,
             context.Request.Path,
@@ -146,8 +146,8 @@ public class RequestLoggingMiddleware
         {
             stopwatch.Stop();
             
-            // Log response
-            _logger.LogInformation("Request {RequestId} completed: {StatusCode} in {ElapsedMs}ms",
+            // 记录响应
+            _logger.LogInformation("请求 {RequestId} 完成：{StatusCode} 耗时 {ElapsedMs}ms",
                 requestId,
                 context.Response.StatusCode,
                 stopwatch.ElapsedMilliseconds);
@@ -156,7 +156,7 @@ public class RequestLoggingMiddleware
 }
 
 /// <summary>
-/// Middleware for API rate limiting
+/// API rate limiting middleware
 /// </summary>
 public class RateLimitingMiddleware
 {
@@ -166,7 +166,7 @@ public class RateLimitingMiddleware
     private readonly object _lock = new object();
     private readonly Timer _cleanupTimer;
 
-    // Rate limiting configuration
+    // 速率限制配置
     private const int MaxRequestsPerMinute = 60;
     private const int MaxConcurrentUploads = 5;
 
@@ -176,7 +176,7 @@ public class RateLimitingMiddleware
         _logger = logger;
         _clients = new Dictionary<string, ClientRequestInfo>();
         
-        // Cleanup expired entries every minute
+        // 每分钟清理过期条目
         _cleanupTimer = new Timer(CleanupExpiredEntries, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
     }
 
@@ -187,16 +187,16 @@ public class RateLimitingMiddleware
 
         if (IsRateLimited(clientId, isUploadRequest))
         {
-            _logger.LogWarning("Rate limit exceeded for client {ClientId} on path {Path}", clientId, context.Request.Path);
+            _logger.LogWarning("客户端 {ClientId} 在路径 {Path} 上超出速率限制", clientId, context.Request.Path);
             
-            context.Response.StatusCode = 429; // Too Many Requests
+            context.Response.StatusCode = 429; // 请求过多
             context.Response.Headers["Retry-After"] = "60";
             
             var response = new ApiResponse<object>
             {
                 Success = false,
-                Message = "Rate limit exceeded",
-                Errors = new List<string> { "Too many requests. Please wait before trying again." }
+                Message = "超出速率限制",
+                Errors = new List<string> { "请求过多。请稍等后再试。" }
             };
 
             var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
@@ -229,28 +229,28 @@ public class RateLimitingMiddleware
 
             var now = DateTime.UtcNow;
 
-            // Clean up old requests (older than 1 minute)
+            // 清理旧请求（超过 1 分钟的）
             clientInfo.RequestTimes.RemoveAll(time => now - time > TimeSpan.FromMinutes(1));
 
-            // Check general rate limit
+            // 检查一般速率限制
             if (clientInfo.RequestTimes.Count >= MaxRequestsPerMinute)
             {
                 return true;
             }
 
-            // Check concurrent upload limit
+            // 检查并发上传限制
             if (isUploadRequest && clientInfo.ConcurrentUploads >= MaxConcurrentUploads)
             {
                 return true;
             }
 
-            // Update tracking
+            // 更新跟踪
             clientInfo.RequestTimes.Add(now);
             if (isUploadRequest)
             {
                 clientInfo.ConcurrentUploads++;
                 
-                // Schedule upload completion tracking (simplified)
+                // 安排上传完成跟踪（简化版）
                 _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
                 {
                     lock (_lock)
@@ -285,7 +285,7 @@ public class RateLimitingMiddleware
 
             if (expiredClients.Count > 0)
             {
-                _logger.LogDebug("Cleaned up {Count} expired client rate limit entries", expiredClients.Count);
+                _logger.LogDebug("清理了 {Count} 个过期的客户端速率限制条目", expiredClients.Count);
             }
         }
     }
@@ -299,7 +299,7 @@ public class RateLimitingMiddleware
 }
 
 /// <summary>
-/// Middleware for setting security headers
+/// 设置安全头的中间件
 /// </summary>
 public class SecurityHeadersMiddleware
 {
@@ -312,14 +312,14 @@ public class SecurityHeadersMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Add security headers
+        // 添加安全头
         context.Response.Headers["X-Content-Type-Options"] = "nosniff";
         context.Response.Headers["X-Frame-Options"] = "DENY";
         context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
         context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'";
 
-        // Remove server header
+        // 移除服务器头
         context.Response.Headers.Remove("Server");
 
         await _next(context);

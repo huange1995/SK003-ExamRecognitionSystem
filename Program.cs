@@ -6,14 +6,14 @@ using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// 配置 Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
-// Add services to the container
+// 向容器添加服务
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -25,13 +25,13 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure custom services
+// 配置自定义服务
 builder.Services.ConfigureApplicationServices(builder.Configuration);
 builder.Services.ConfigureSemanticKernel(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// 配置 HTTP 请求管道
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -45,10 +45,10 @@ app.UseDefaultFiles(new DefaultFilesOptions
 {
     DefaultFileNames = { "index.html" }
 });
-// Configure static files
+// 配置静态文件
 app.UseStaticFiles();
 
-// Add custom middleware
+// 添加自定义中间件
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

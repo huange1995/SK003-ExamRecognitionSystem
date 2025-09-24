@@ -76,7 +76,7 @@ namespace ExamRecognitionSystem.Extensions
             Kernel? kernel = null,
             CancellationToken cancellationToken = default)
         {
-            // 检查执行设置中是否包含图片信息
+            // 检查执行设置是否包含图像信息
             var imageUrl = executionSettings?.ExtensionData?.TryGetValue("imageUrl", out var urlValue) == true ? urlValue as string : null;
             var base64Image = executionSettings?.ExtensionData?.TryGetValue("base64Image", out var base64Value) == true ? base64Value as string : null;
             var imageFormat = executionSettings?.ExtensionData?.TryGetValue("imageFormat", out var formatValue) == true ? formatValue as string ?? "png" : "png";
@@ -88,7 +88,7 @@ namespace ExamRecognitionSystem.Extensions
             {
                 var messageContent = new List<object> { new { type = "text", text = msg.Content } };
 
-                // 如果是最后一条用户消息且包含图片信息，添加图片内容
+                // 如果这是最后一条用户消息并包含图像信息，则添加图像内容
                 if (msg == chatHistory.LastOrDefault() && msg.Role == AuthorRole.User)
                 {
                     if (!string.IsNullOrWhiteSpace(imageUrl))
@@ -283,13 +283,13 @@ namespace ExamRecognitionSystem.Extensions
 
 
     /// <summary>
-    /// 图片处理辅助类
-    /// </summary>
+/// 图像处理辅助类
+/// </summary>
     public static class ImageHelper
     {
         /// <summary>
-        /// 验证URL是否为有效的图片URL
-        /// </summary>
+    /// 验证URL是否为有效的图像URL
+    /// </summary>
         public static bool IsValidImageUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
@@ -308,8 +308,8 @@ namespace ExamRecognitionSystem.Extensions
         }
 
         /// <summary>
-        /// 验证base64字符串是否有效
-        /// </summary>
+    /// 验证base64字符串是否有效
+    /// </summary>
         public static bool IsValidBase64(string base64String)
         {
             if (string.IsNullOrWhiteSpace(base64String))
@@ -327,8 +327,8 @@ namespace ExamRecognitionSystem.Extensions
         }
 
         /// <summary>
-        /// 验证base64图片字符串是否有效
-        /// </summary>
+    /// 验证base64图像字符串是否有效
+    /// </summary>
         public static bool IsValidBase64Image(string base64String)
         {
             if (string.IsNullOrWhiteSpace(base64String))
@@ -348,16 +348,16 @@ namespace ExamRecognitionSystem.Extensions
         }
 
         /// <summary>
-        /// 创建base64图片URL
-        /// </summary>
+    /// 创建base64图像URL
+    /// </summary>
         public static string CreateBase64ImageUrl(string base64String, string imageFormat = "png")
         {
             return $"data:image/{imageFormat};base64,{base64String}";
         }
 
         /// <summary>
-        /// 从base64 URL中提取base64字符串
-        /// </summary>
+    /// 从base64 URL中提取base64字符串
+    /// </summary>
         public static string? ExtractBase64FromUrl(string dataUrl)
         {
             if (string.IsNullOrWhiteSpace(dataUrl) || !dataUrl.StartsWith("data:image/"))

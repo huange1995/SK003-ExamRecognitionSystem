@@ -3,7 +3,7 @@ using ExamRecognitionSystem.Models;
 namespace ExamRecognitionSystem.DTOs;
 
 /// <summary>
-/// Response for file upload operation
+/// 文件上传操作的响应
 /// </summary>
 public class FileUploadResponse
 {
@@ -16,7 +16,7 @@ public class FileUploadResponse
 }
 
 /// <summary>
-/// Request for starting processing
+/// 开始处理的请求
 /// </summary>
 public class ProcessingStartRequest
 {
@@ -25,7 +25,7 @@ public class ProcessingStartRequest
 }
 
 /// <summary>
-/// Response for processing status
+/// 处理状态的响应
 /// </summary>
 public class ProcessingStatusResponse
 {
@@ -41,7 +41,7 @@ public class ProcessingStatusResponse
 }
 
 /// <summary>
-/// Task status DTO
+/// 任务状态 DTO
 /// </summary>
 public class TaskStatusDto
 {
@@ -57,7 +57,7 @@ public class TaskStatusDto
 }
 
 /// <summary>
-/// Performance metrics DTO
+/// 性能指标 DTO
 /// </summary>
 public class PerformanceMetricsDto
 {
@@ -123,7 +123,7 @@ public class ApiResponse<T>
     public List<string> Errors { get; set; } = new();
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     
-    public static ApiResponse<T> SuccessResult(T data, string message = "Operation completed successfully")
+    public static ApiResponse<T> SuccessResult(T data, string message = "操作成功完成")
     {
         return new ApiResponse<T>
         {
@@ -145,7 +145,7 @@ public class ApiResponse<T>
 }
 
 /// <summary>
-/// System health status DTO
+/// 系统健康状态 DTO
 /// </summary>
 public class SystemHealthDto
 {

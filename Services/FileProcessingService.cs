@@ -12,7 +12,7 @@ using System.Text;
 namespace ExamRecognitionSystem.Services;
 
 /// <summary>
-/// Interface for file processing operations
+/// 文件处理操作接口
 /// </summary>
 public interface IFileProcessingService
 {
@@ -23,7 +23,7 @@ public interface IFileProcessingService
 }
 
 /// <summary>
-/// Interface for question parsing operations
+/// 题目解析操作接口
 /// </summary>
 public interface IQuestionParsingService
 {
@@ -34,7 +34,7 @@ public interface IQuestionParsingService
 }
 
 /// <summary>
-/// Service for processing various file formats and extracting content
+/// 用于处理各种文件格式并提取内容的服务
 /// </summary>
 public class FileProcessingService : IFileProcessingService
 {
@@ -107,7 +107,7 @@ public class FileProcessingService : IFileProcessingService
                 return false;
             }
 
-            // Validate file format based on type
+            // 根据类型验证文件格式
             var isValid = fileType switch
             {
                 FileType.Pdf => await ValidatePdfFileAsync(filePath),
@@ -198,8 +198,8 @@ public class FileProcessingService : IFileProcessingService
 
     private async Task<string> ExtractTextFromImageAsync(string imagePath, CancellationToken cancellationToken)
     {
-        // For image text extraction, we'll return a placeholder since OCR would require additional libraries
-        // In a real implementation, you would integrate with libraries like Tesseract.NET
+        // For image text extraction, we return a placeholder because OCR requires additional libraries
+        // In actual implementation, you need to integrate libraries like Tesseract.NET
         var imageInfo = await GetImageInfoAsync(imagePath, cancellationToken);
         return $"[IMAGE: {imageInfo.Width}x{imageInfo.Height}, Format: {imageInfo.Format}]";
     }
@@ -254,8 +254,8 @@ public class FileProcessingService : IFileProcessingService
     {
         var extractedImages = new List<string>();
         
-        // PDF image extraction is complex and would require additional libraries
-        // This is a placeholder implementation
+        // PDF image extraction is complex and requires additional libraries
+        // 这是一个占位符实现
         _logger.LogInformation("PDF image extraction not implemented yet");
         
         return await Task.FromResult(extractedImages);
@@ -309,7 +309,7 @@ public class FileProcessingService : IFileProcessingService
 }
 
 /// <summary>
-/// Service for parsing questions using Semantic Kernel
+/// 使用Semantic Kernel解析题目的服务
 /// </summary>
 public class QuestionParsingService : IQuestionParsingService
 {
@@ -336,7 +336,7 @@ public class QuestionParsingService : IQuestionParsingService
 
             var fileType = filePath.GetFileTypeFromExtension();
             
-            // Validate file first
+            // 首先验证文件
             if (!await _fileProcessingService.ValidateFileAsync(filePath, fileType))
             {
                 throw new InvalidOperationException($"File {filePath} is not valid or corrupted");
@@ -387,7 +387,7 @@ public class QuestionParsingService : IQuestionParsingService
             // Convert image to base64
             var imageBase64 = await _fileProcessingService.ConvertImageToBase64Async(imagePath, cancellationToken);
 
-            // Create vision analysis request
+            // 创建视觉分析请求
             var request = new VisionAnalysisRequest
             {
                 ImageBase64 = imageBase64,
@@ -397,7 +397,7 @@ public class QuestionParsingService : IQuestionParsingService
                 Temperature = 0.3
             };
 
-            // Analyze with Semantic Kernel
+            // Analyze using Semantic Kernel
             var response = await _semanticKernelService.AnalyzeImageAsync(request, cancellationToken);
             
             if (!response.Success)
@@ -426,7 +426,7 @@ public class QuestionParsingService : IQuestionParsingService
             if (questionSets.Count == 1)
                 return questionSets[0];
 
-            // Merge questions by question number, preferring more complete data
+            // 按题目编号合并题目，优先选择更完整的数据
             var mergedQuestions = new Dictionary<int, ExamQuestion>();
 
             foreach (var questionSet in questionSets)
@@ -435,7 +435,7 @@ public class QuestionParsingService : IQuestionParsingService
                 {
                     if (mergedQuestions.TryGetValue(question.QuestionNumber, out var existing))
                     {
-                        // Merge with existing question, preferring more complete data
+                        // 与现有题目合并，优先选择更完整的数据
                         var merged = MergeQuestions(existing, question);
                         mergedQuestions[question.QuestionNumber] = merged;
                     }
@@ -461,7 +461,7 @@ public class QuestionParsingService : IQuestionParsingService
 
     private async Task<List<ExamQuestion>> ParseQuestionsFromDocumentAsync(string filePath, FileType fileType, List<int> questionNumbers, CancellationToken cancellationToken)
     {
-        // Extract text from document
+        // 从文档中提取文本
         var text = await _fileProcessingService.ConvertToTextAsync(filePath, fileType, cancellationToken);
         
         if (string.IsNullOrWhiteSpace(text))
@@ -470,7 +470,7 @@ public class QuestionParsingService : IQuestionParsingService
             return new List<ExamQuestion>();
         }
 
-        // Parse questions from extracted text
+        // 从提取的文本中解析题目
         return await ParseQuestionsFromTextAsync(text, questionNumbers, cancellationToken);
     }
 
@@ -495,7 +495,7 @@ public class QuestionParsingService : IQuestionParsingService
         if (string.IsNullOrWhiteSpace(content1)) return content2;
         if (string.IsNullOrWhiteSpace(content2)) return content1;
         
-        // Prefer longer, more detailed content
+        // 优先选择更长、更详细的内容
         return content1.Length >= content2.Length ? content1 : content2;
     }
 }

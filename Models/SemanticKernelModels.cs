@@ -1,7 +1,7 @@
 namespace ExamRecognitionSystem.Models;
 
 /// <summary>
-/// Configuration settings for Ollama AI model
+/// Ollama AI 模型的配置设置
 /// </summary>
 public class OllamaSettings
 {
@@ -14,7 +14,7 @@ public class OllamaSettings
 }
 
 /// <summary>
-/// Configuration settings for OpenAI API
+/// OpenAI API 的配置设置
 /// </summary>
 public class OpenAISettings
 {
@@ -29,7 +29,7 @@ public class OpenAISettings
 }
 
 /// <summary>
-/// Configuration settings for Doubao API
+/// 豆包 API 的配置设置
 /// </summary>
 public class DoubaoSettings
 {
@@ -43,18 +43,18 @@ public class DoubaoSettings
 }
 
 /// <summary>
-/// AI provider configuration
+/// AI 提供商配置
 /// </summary>
 public class AIProviderSettings
 {
-    public string Provider { get; set; } = "Ollama"; // "Ollama", "OpenAI", or "Doubao"
+    public string Provider { get; set; } = "Ollama"; // "Ollama"、"OpenAI" 或 "Doubao"
     public OllamaSettings Ollama { get; set; } = new();
     public OpenAISettings OpenAI { get; set; } = new();
     public DoubaoSettings Doubao { get; set; } = new();
 }
 
 /// <summary>
-/// Represents conversation history for multi-turn dialogues
+/// Represents conversation history for multi-turn dialogue
 /// </summary>
 public class ConversationHistory
 {
@@ -67,11 +67,11 @@ public class ConversationHistory
 }
 
 /// <summary>
-/// Individual message in a conversation
+/// A single message in the conversation
 /// </summary>
 public class ConversationMessage
 {
-    public string Role { get; set; } = string.Empty; // "user", "assistant", "system"
+    public string Role { get; set; } = string.Empty; // "user"、"assistant"、"system"
     public string Content { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public string? ImageBase64 { get; set; }

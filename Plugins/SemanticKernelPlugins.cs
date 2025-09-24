@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace ExamRecognitionSystem.Plugins;
 
 /// <summary>
-/// Semantic Kernel plugin for question parsing and analysis
+/// 用于题目解析和分析的 Semantic Kernel 插件
 /// </summary>
 public class QuestionParsingPlugin
 {
@@ -148,7 +148,7 @@ public class QuestionParsingPlugin
 }
 
 /// <summary>
-/// Plugin for image analysis and OCR operations
+/// 用于图像分析和OCR操作的插件
 /// </summary>
 public class ImageAnalysisPlugin
 {
@@ -223,7 +223,7 @@ public class ImageAnalysisPlugin
 }
 
 /// <summary>
-/// Plugin for file processing operations
+/// 用于文件处理操作的插件
 /// </summary>
 public class FileProcessingPlugin
 {

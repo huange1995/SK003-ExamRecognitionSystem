@@ -1,9 +1,9 @@
-// Demo application for Exam Recognition System
+// 试卷识别系统演示应用
 let demoTimer = null;
 let currentStep = 0;
 let isDemo = true;
 
-// Sample data for demo
+// 演示用样本数据
 const sampleQuestions = [
     {
         questionNumber: 1,
@@ -79,7 +79,7 @@ const sampleQuestions = [
     }
 ];
 
-// Initialize demo
+// 初始化演示
 $(document).ready(function() {
     initializeDemoHandlers();
     showToast('info', '演示模式已激活。使用演示控制来模拟系统工作流程。');
@@ -93,7 +93,7 @@ function initializeDemoHandlers() {
     $('#exportResults').click(exportDemoResults);
     $('#newUpload').click(resetDemo);
     
-    // Filter handlers
+    // 过滤器处理器
     $('#typeFilter').change(filterQuestions);
     $('#searchInput').on('input', filterQuestions);
 }
@@ -101,7 +101,7 @@ function initializeDemoHandlers() {
 function simulateFileUpload() {
     showToast('success', '模拟文件上传：sample_exam.pdf (2.5 MB)');
     
-    // Show file preview simulation
+    // 显示文件预览模拟
     $('#uploadArea').html(`
         <div class="file-preview" style="display: block;">
             <div class="file-item">
@@ -139,19 +139,19 @@ function simulateFileUpload() {
 function simulateProcessing() {
     showToast('success', '开始模拟处理...');
     
-    // Switch to progress view
+    // 切换到进度视图
     $('.upload-section').hide();
     $('#progressSection').show();
     
-    // Initialize progress display
+    // 初始化进度显示
     $('#totalQuestions').text(sampleQuestions.length);
     $('#completedQuestions').text(0);
     $('#activeThreads').text(3);
     
-    // Create thread status display
+    // 创建线程状态显示
     createDemoThreads();
     
-    // Start progress simulation
+    // 开始进度模拟
     currentStep = 0;
     startProgressSimulation();
 }
@@ -188,17 +188,17 @@ function startProgressSimulation() {
     demoTimer = setInterval(() => {
         currentStep++;
         
-        // Update progress
+        // 更新进度
         const progress = (currentStep / totalQuestions) * 100;
         $('#progressFill').css('width', progress + '%');
         $('#progressText').text(Math.round(progress) + '%');
         $('#completedQuestions').text(currentStep);
         
-        // Update processing speed
+        // 更新处理速度
         const speed = (currentStep / (currentStep * interval / 1000)).toFixed(1);
         $('#processingSpeed').text(speed);
         
-        // Update system metrics
+        // 更新系统指标
         const cpuUsage = (20 + Math.random() * 30).toFixed(1);
         const memoryUsage = (512 + Math.random() * 256).toFixed(0);
         const time = formatTime(currentStep * interval);
@@ -207,10 +207,10 @@ function startProgressSimulation() {
         $('#memoryUsage').text(memoryUsage + ' MB');
         $('#processingTime').text(time);
         
-        // Update thread status
+        // 更新线程状态
         updateDemoThreadStatus(currentStep);
         
-        // Check if complete
+        // 检查是否完成
         if (currentStep >= totalQuestions) {
             clearInterval(demoTimer);
             completeProcessing();
@@ -246,16 +246,16 @@ function completeProcessing() {
 }
 
 function showSampleResults() {
-    // Switch to results view
+    // 切换到结果视图
     $('#progressSection').hide();
     $('#resultsSection').show();
     
-    // Update summary
+    // 更新摘要
     $('#totalExtracted').text(sampleQuestions.length);
     $('#finalProcessingTime').text('00:00:15');
     $('#averageSpeed').text('0.5 Q/s');
     
-    // Display questions
+    // 显示题目
     displayDemoQuestions(sampleQuestions);
     
     showToast('success', '示例结果加载成功！');
@@ -324,12 +324,12 @@ function filterQuestions() {
         
         let visible = true;
         
-        // Type filter
+        // 类型过滤
         if (typeFilter !== 'all' && itemType !== typeFilter) {
             visible = false;
         }
         
-        // Search filter
+        // 搜索过滤
         if (searchText && !itemContent.includes(searchText)) {
             visible = false;
         }
@@ -361,18 +361,18 @@ function exportDemoResults() {
 }
 
 function resetDemo() {
-    // Clear timers
+    // 清除计时器
     if (demoTimer) {
         clearInterval(demoTimer);
         demoTimer = null;
     }
     
-    // Reset UI
+    // 重置界面
     $('.upload-section').show();
     $('#progressSection').hide();
     $('#resultsSection').hide();
     
-    // Reset upload area
+    // 重置上传区域
     $('#uploadArea').html(`
         <div class="upload-icon">
             <i class="fas fa-cloud-upload-alt"></i>
@@ -381,11 +381,11 @@ function resetDemo() {
         <p class="file-info">支持格式：PDF、DOCX、JPEG、PNG（最大10MB）</p>
     `);
     
-    // Reset filters
+    // 重置过滤器
     $('#typeFilter').val('all');
     $('#searchInput').val('');
     
-    // Reset progress
+    // 重置进度
     currentStep = 0;
     $('#progressFill').css('width', '0%');
     $('#progressText').text('0%');
@@ -393,7 +393,7 @@ function resetDemo() {
     showToast('info', '演示已重置。准备重新开始！');
 }
 
-// Utility functions
+// 工具函数
 function showToast(type, message, duration = 5000) {
     const icons = {
         success: 'fas fa-check-circle',
@@ -410,15 +410,15 @@ function showToast(type, message, duration = 5000) {
         </div>
     `);
     
-    // Add click handler for close button
+    // 为关闭按钮添加点击处理器
     toast.find('.toast-close').click(function() {
         toast.remove();
     });
     
-    // Add to container
+    // 添加到容器
     $('#toastContainer').append(toast);
     
-    // Auto remove after duration
+    // 持续时间后自动移除
     setTimeout(() => {
         toast.fadeOut(300, () => toast.remove());
     }, duration);

@@ -1,4 +1,4 @@
-// Global variables
+// 全局变量
 let currentSessionId = null;
 let progressTimer = null;
 let currentQuestions = [];
@@ -16,7 +16,7 @@ const API_ENDPOINTS = {
     exportResults: (sessionId) => `${API_BASE}/api/monitoring/export/${sessionId}`
 };
 
-// Initialize the application
+// Initialize application
 $(document).ready(function() {
     initializeEventHandlers();
     checkSystemHealth();
@@ -27,7 +27,7 @@ $(document).ready(function() {
 
 // Event handlers
 function initializeEventHandlers() {
-    // 先解绑所有事件，防止重复绑定
+    // Unbind all events first to prevent duplicate binding
     $('#browseBtn').off('click');
     $('#fileInput').off('change');
     $('#uploadArea').off('click dragover dragleave drop');
@@ -35,7 +35,7 @@ function initializeEventHandlers() {
     // File upload handlers
     $('#browseBtn').click(function(e) {
         e.preventDefault();
-        e.stopPropagation(); // 阻止事件冒泡
+        e.stopPropagation(); // Prevent event bubbling
         $('#fileInput').trigger('click');
     });
     $('#fileInput').change(handleFileSelect);
@@ -46,9 +46,9 @@ function initializeEventHandlers() {
         .on('dragleave', handleDragLeave)
         .on('drop', handleFileDrop)
         .click(function(e) {
-            // 只有当点击的不是按钮或其子元素时才触发文件选择
+            // Only trigger file selection when clicking is not on button or its child elements
             if (!$(e.target).closest('#browseBtn').length && e.target !== this) {
-                return; // 避免在按钮区域触发
+                return; // Avoid triggering in button area
             }
             if (e.target === this) {
                 $('#fileInput').trigger('click');
@@ -67,7 +67,7 @@ function initializeEventHandlers() {
     $('#typeFilter').change(filterQuestions);
     $('#searchInput').on('input', filterQuestions);
     
-    // Prevent default drag behavior on document
+    // Prevent document's default drag behavior
     $(document).on('dragover drop', function(e) {
         e.preventDefault();
     });
@@ -170,7 +170,7 @@ function displayFilePreview(file) {
     
     $('.file-icon i').attr('class', iconClass);
     
-    // Show preview and config sections
+    // Show preview and configuration sections
     $('#uploadArea').hide();
     $('#filePreview').show();
     $('#processingConfig').show();
@@ -193,7 +193,7 @@ function startProcessing() {
         return;
     }
     
-    // Show loading
+    // Show loading state
     showLoading('正在上传文件...');
     
     // Create form data
@@ -266,7 +266,7 @@ function showProcessingSection() {
 }
 
 function startProgressMonitoring() {
-    // Clear any existing timer first
+    // First clear any existing timer
     if (progressTimer) {
         clearInterval(progressTimer);
         progressTimer = null;
@@ -275,7 +275,7 @@ function startProgressMonitoring() {
     // Update progress immediately
     updateProgress();
     
-    // Set up interval for progress updates
+    // Set timer for progress updates
     progressTimer = setInterval(updateProgress, 2000);
 }
 
@@ -289,7 +289,7 @@ function updateProgress() {
             if (response.success) {
                 const data = response.data;
                 updateProgressDisplay(data);
-                // Check if processing is complete
+                // Check if processing is completed
                 if (data.status === 4) { // Completed
                     processingCompleted();
                 } else if (data.status === 5) { // Failed
@@ -333,7 +333,7 @@ function updateThreadStatus(taskStatuses) {
     threadList.empty();
     
     taskStatuses.forEach(task => {
-        // 确保 task.status 是字符串类型
+        // Ensure task.status is string type
         const status = task.status ? String(task.status) : 'unknown';
         const statusClass = `status-${status.toLowerCase().replace('progress', 'inprogress')}`;
         const threadItem = $(`
@@ -393,7 +393,7 @@ function cancelProcessing() {
     });
 }
 
-// Results handling
+// Result handling
 function loadResults() {
     $.ajax({
         url: API_ENDPOINTS.getQuestions(currentSessionId),
@@ -488,12 +488,12 @@ function filterQuestions() {
         
         let visible = true;
         
-        // Type filter
+        // Type filtering
         if (typeFilter !== 'all' && itemType !== typeFilter) {
             visible = false;
         }
         
-        // Search filter
+        // Search filtering
         if (searchText && !itemContent.includes(searchText)) {
             visible = false;
         }
@@ -522,13 +522,13 @@ function resetToUpload() {
     currentQuestions = [];
     isProcessing = false;
     
-    // Clear intervals
+    // Clear timer
     if (progressTimer) {
         clearInterval(progressTimer);
         progressTimer = null;
     }
     
-    // Reset UI
+    // Reset interface
     clearFileSelection();
     $('#progressSection').hide();
     $('#resultsSection').hide();
@@ -600,12 +600,12 @@ function formatBytes(bytes) {
 }
 
 function formatDuration(duration) {
-    // Duration comes as TimeSpan string like "00:02:15"
+    // Duration passed as TimeSpan string, e.g. "00:02:15"
     if (typeof duration === 'string') {
         return duration;
     }
     
-    // If it's in milliseconds
+    // If in milliseconds
     const totalSeconds = Math.floor(duration / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -620,7 +620,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Handle browser back/forward
+// Handle browser forward/back
 window.addEventListener('popstate', function() {
     // Handle navigation if needed
 });

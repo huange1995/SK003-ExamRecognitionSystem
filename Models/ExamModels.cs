@@ -1,7 +1,7 @@
 namespace ExamRecognitionSystem.Models;
 
 /// <summary>
-/// Represents an exam question with all its properties
+/// 表示包含所有属性的考试题目
 /// </summary>
 public class ExamQuestion
 {
@@ -15,7 +15,7 @@ public class ExamQuestion
 }
 
 /// <summary>
-/// Enumeration of supported question types
+/// 支持的题目类型枚举
 /// </summary>
 public enum QuestionType
 {
@@ -28,7 +28,7 @@ public enum QuestionType
 }
 
 /// <summary>
-/// Represents a processing task for a group of questions
+/// 表示一组题目的处理任务
 /// </summary>
 public class ProcessingTask
 {
@@ -42,11 +42,11 @@ public class ProcessingTask
     public DateTime? CompletedAt { get; set; }
     public List<ExamQuestion> Questions { get; set; } = new();
     public string? ErrorMessage { get; set; }
-    public int Progress { get; set; } = 0; // 0-100 percentage
+    public int Progress { get; set; } = 0; // 0-100 百分比
 }
 
 /// <summary>
-/// Task status enumeration
+/// 任务状态枚举
 /// </summary>
 public enum TaskStatus
 {
@@ -58,7 +58,7 @@ public enum TaskStatus
 }
 
 /// <summary>
-/// Represents the overall processing session
+/// 表示整体处理会话
 /// </summary>
 public class ProcessingSession
 {
@@ -80,7 +80,7 @@ public class ProcessingSession
 }
 
 /// <summary>
-/// File type enumeration
+/// 文件类型枚举
 /// </summary>
 public enum FileType
 {
@@ -92,7 +92,7 @@ public enum FileType
 }
 
 /// <summary>
-/// Session status enumeration
+/// 会话状态枚举
 /// </summary>
 public enum SessionStatus
 {
@@ -106,7 +106,7 @@ public enum SessionStatus
 }
 
 /// <summary>
-/// Performance metrics for monitoring
+/// 用于监控的性能指标
 /// </summary>
 public class PerformanceMetrics
 {
@@ -118,7 +118,7 @@ public class PerformanceMetrics
 }
 
 /// <summary>
-/// Thread pool configuration
+/// 线程池配置
 /// </summary>
 public class ThreadPoolConfig
 {

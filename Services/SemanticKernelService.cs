@@ -9,7 +9,7 @@ using System.Text.Json;
 namespace ExamRecognitionSystem.Services;
 
 /// <summary>
-/// Service for managing Semantic Kernel operations with Doubao vision model
+/// 管理豆包视觉模型的 Semantic Kernel 操作服务
 /// </summary>
 public interface ISemanticKernelService
 {
@@ -48,20 +48,20 @@ public class SemanticKernelService : ISemanticKernelService
         {
             _logger.LogInformation("Starting vision analysis for image with {QuestionCount} questions", request.QuestionNumbers.Count);
 
-            // Get or create conversation history
+            // 获取或创建对话历史
             var conversation = request.History ?? await CreateConversationAsync("Exam paper question extraction");
             
-            // Build the analysis prompt
+            // 构建分析提示
             var questionNumbers = request.QuestionNumbers.Select(q => int.TryParse(q, out var num) ? num : 0).Where(n => n > 0).ToList();
             var prompt = BuildAnalysisPrompt(request.Prompt, questionNumbers);
             
-            // Create chat history from conversation
+            // 从对话中创建聊天历史
             var chatHistory = new ChatHistory();
             
-            // Add system message
+            // 添加系统消息
             chatHistory.AddSystemMessage(GetSystemPrompt());
             
-            // Add previous conversation messages
+            // 添加之前的对话消息
             foreach (var msg in conversation.Messages)
             {
                 if (msg.Role == "user")
@@ -74,15 +74,15 @@ public class SemanticKernelService : ISemanticKernelService
                 }
             }
 
-            // Add current request with image
+            // 添加当前带图像的请求
             var userMessage = prompt;
             chatHistory.AddUserMessage(userMessage);
             if (!string.IsNullOrEmpty(request.ImageBase64))
             {
-                //userMessage += "\n[Image data provided for analysis]";
+                //userMessage += "\n[已提供图像数据用于分析]";
           
             }
-            // Configure execution settings
+            // 配置执行设置
             var executionSettings = new OpenAIPromptExecutionSettings
             {
                 MaxTokens = request.MaxTokens,
@@ -96,12 +96,12 @@ public class SemanticKernelService : ISemanticKernelService
                     { "imageFormat", "png" }
                 }
             };
-            // Get response from the model
+            // 从模型获取响应
             var response = await _chatService.GetChatMessageContentAsync(chatHistory, executionSettings, _kernel, cancellationToken);
             
             stopwatch.Stop();
 
-            // Update conversation history
+            // 更新对话历史
             conversation.Messages.Add(new ConversationMessage
             {
                 Role = "user",
@@ -120,7 +120,7 @@ public class SemanticKernelService : ISemanticKernelService
             conversation.LastActivity = DateTime.UtcNow;
             _conversations.TryAdd(conversation.ConversationId, conversation);
 
-            // Parse extracted questions
+            // 解析提取的问题
             var extractedQuestions = await ParseExtractedQuestionsAsync(response.Content ?? "", questionNumbers);
 
             _logger.LogInformation("Vision analysis completed successfully. Extracted {QuestionCount} questions in {Duration}ms", 
@@ -189,12 +189,12 @@ public class SemanticKernelService : ISemanticKernelService
                 string.Join(", ", questionNumbers));
 
             var prompt = $"""
-                Extract exam questions from the following text. Focus on questions numbered: {string.Join(", ", questionNumbers)}
+                从以下文本中提取考试问题。重点关注编号为：{string.Join(", ", questionNumbers)} 的问题
                 
-                Text to analyze:
+                要分析的文本：
                 {text}
                 
-                Please extract the questions in the specified JSON format.
+                请按照指定的JSON格式提取问题。
                 """;
 
             var chatHistory = new ChatHistory();
@@ -204,7 +204,7 @@ public class SemanticKernelService : ISemanticKernelService
             var response = await _chatService.GetChatMessageContentAsync(chatHistory, new OpenAIPromptExecutionSettings
             {
                 MaxTokens = GetCurrentProviderMaxTokens(),
-                Temperature = 0.3 // Lower temperature for more consistent extraction
+                Temperature = 0.3 // 较低的温度值以获得更一致的提取结果
             }, _kernel, cancellationToken);
 
             return await ParseExtractedQuestionsAsync(response.Content ?? "", questionNumbers);
@@ -219,38 +219,38 @@ public class SemanticKernelService : ISemanticKernelService
     private string BuildAnalysisPrompt(string basePrompt, List<int> questionNumbers)
     {
         var questionRange = questionNumbers.Count > 0 ? 
-            $"Focus specifically on questions numbered: {string.Join(", ", questionNumbers)}" : 
-            "Extract all visible questions";
+            $"重点关注编号为：{string.Join(", ", questionNumbers)} 的问题" : 
+            "提取所有可见的问题";
 
         return $"""
             {basePrompt}
             
             {questionRange}
             
-            Please analyze this exam paper image and extract the questions in the specified format.
-            Pay attention to:
-            1. Question numbers and their exact content
-            2. Question types (single choice, multiple choice, fill-in-blank, short answer, essay)
-            3. Point values for each question
-            4. Available options for choice questions
-            5. Any visible answers or answer keys
+            请分析这张考试试卷图片并按照指定格式提取问题。
+            请注意：
+            1. 问题编号及其确切内容
+            2. 问题类型（单选题、多选题、填空题、简答题、论述题）
+            3. 每个问题的分值
+            4. 选择题的可选项
+            5. 任何可见的答案或答案键
             
-            Provide the response in the JSON format specified in the system prompt.
+            请按照系统提示中指定的JSON格式提供响应。
             """;
     }
 
     private string GetSystemPrompt()
     {
         return """
-            You are an expert exam paper analyzer. Your task is to extract questions from exam papers (images or text) and structure them in a specific JSON format.
+            您是一位专业的考试试卷分析师。您的任务是从考试试卷（图片或文本）中提取问题并按照特定的JSON格式进行结构化。
 
-            For each question, identify:
-            1. Question number
-            2. Complete question content (including question stem and all options)
-            3. Question type: SingleChoice, MultipleChoice, FillInBlank, ShortAnswer, Essay, or Unknown
-            4. Point value (extract from text like "3分", "5 points", etc.)
-            5. Options (for choice questions, list all options A, B, C, D, etc.)
-            6. Answer (if visible in the image/text)
+            对于每个问题，请识别：
+            1. 问题编号
+            2. 完整的问题内容（包括题干和所有选项）
+            3. 问题类型：SingleChoice（单选）、MultipleChoice（多选）、FillInBlank（填空）、ShortAnswer（简答）、Essay（论述）或Unknown（未知）
+            4. 分值（从文本中提取，如"3分"、"5 points"等）
+            5. 选项（对于选择题，列出所有选项A、B、C、D等）
+            6. 答案（如果在图片/文本中可见）
 
             Response format (JSON):
             {
@@ -267,15 +267,15 @@ public class SemanticKernelService : ISemanticKernelService
               ]
             }
 
-            Important guidelines:
-            - Be precise with question numbers
-            - Include complete question content
-            - Identify question types accurately
-            - Extract point values as decimal numbers
-            - For choice questions, include all options with their labels
-            - Only include answers if they are clearly visible
-            - Use null for missing information
-            - Ensure valid JSON format
+            重要指导原则：
+            - 准确识别问题编号
+            - 包含完整的问题内容
+            - 准确识别问题类型
+            - 将分值提取为十进制数字
+            - 对于选择题，包含所有选项及其标签
+            - 仅在答案清晰可见时才包含答案
+            - 对缺失信息使用null
+            - 确保有效的JSON格式
             """;
     }
 
@@ -285,7 +285,7 @@ public class SemanticKernelService : ISemanticKernelService
         
         try
         {
-            // Try to extract JSON from the response
+            // 尝试从响应中提取JSON
             var jsonStart = response.IndexOf('{');
             var jsonEnd = response.LastIndexOf('}') + 1;
             
@@ -339,11 +339,11 @@ public class SemanticKernelService : ISemanticKernelService
         {
             _logger.LogError(ex, "Error parsing extracted questions from response: {Error}", ex.Message);
             
-            // Fallback: try to create basic questions based on expected numbers
+            // 备用方案：尝试基于预期编号创建基本问题
             questions = expectedQuestionNumbers.Select(num => new ExamQuestion
             {
                 QuestionNumber = num,
-                Content = $"Question {num} - Content extraction failed",
+                Content = $"问题 {num} - 内容提取失败",
                 Type = QuestionType.Unknown,
                 Points = 0
             }).ToList();
@@ -353,7 +353,7 @@ public class SemanticKernelService : ISemanticKernelService
     }
 
     /// <summary>
-    /// Gets the maximum tokens setting for the current AI provider
+    /// 获取当前AI提供商的最大令牌设置
     /// </summary>
     private int GetCurrentProviderMaxTokens()
     {
@@ -363,7 +363,7 @@ public class SemanticKernelService : ISemanticKernelService
     }
 
     /// <summary>
-    /// Gets the temperature setting for the current AI provider
+    /// 获取当前AI提供商的温度设置
     /// </summary>
     private double GetCurrentProviderTemperature()
     {
